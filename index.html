@@ -51,6 +51,8 @@ button{border:0;color:var(--ink);cursor:pointer}
 .lyrics{height:190px;overflow-y:auto;text-align:center;padding:47px 14px;scrollbar-width:none;mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
 .lyrics::-webkit-scrollbar{display:none}
 .lyrics p{margin:0;padding:6px 0;font-size:14px;line-height:1.65;color:var(--muted);opacity:.58;transition:color .25s,opacity .25s,transform .25s}
+.lyric-word{display:inline;transition:color .12s,text-shadow .12s}
+.lyric-word.word-on{color:var(--accent);text-shadow:0 0 12px color-mix(in srgb,var(--accent) 45%,transparent)}
 .lyrics p.on{color:#fff;opacity:1;font-size:17px;font-weight:600;transform:scale(1.02);text-shadow:0 0 18px rgba(231,218,250,.38)}
 .playlist{padding:7px}
 .pl-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 11px;border-radius:12px;cursor:pointer;transition:background .2s}
@@ -133,19 +135,44 @@ const fmt=s=>Number.isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).pa
 au.volume=.8;
 function parseLyrics(source){
  const out=[];let hasTime=false;
- source.split(/\r?\n/).forEach(line=>{
-  const re=/\[(\d+):(\d+(?:\.\d+)?)\]/g;let match,times=[];
-  while((match=re.exec(line)))times.push(Number(match[1])*60+Number(match[2]));
+ source.split(/\r?\n/).forEach(raw=>{
+  const line=raw.replace(/^\s*v\d+\s*:\s*/i,'').trim();
+  if(!line)return;
+  // Word-synced LRC/Enhanced LRC: <mm:ss.mmm>word<mm:ss.mmm>word
+  const wordRe=/<(\d+):(\d+(?:\.\d+)?)>([^<]*)/g;
+  const words=[];let match;
+  while((match=wordRe.exec(line))){
+   const t=Number(match[1])*60+Number(match[2]);
+   const x=match[3];
+   if(x)words.push({t,x});
+  }
+  if(words.length){
+   hasTime=true;
+   const x=words.map(w=>w.x).join('').replace(/\s+/g,' ').trim();
+   if(x)out.push({t:words[0].t,x,words});
+   return;
+  }
+  // Standard line-synced LRC
+  const re=/\[(\d+):(\d+(?:\.\d+)?)\]/g;let m,times=[];
+  while((m=re.exec(line)))times.push(Number(m[1])*60+Number(m[2]));
   const lyric=line.replace(re,'').trim();
-  if(times.length){hasTime=true;if(lyric)times.forEach(t=>out.push({t,x:lyric}))}
-  else if(lyric&&!/^\[[a-z]+:/i.test(lyric))out.push({t:-1,x:lyric});
+  if(times.length){hasTime=true;if(lyric)times.forEach(t=>out.push({t,x:lyric,words:[]}))}
+  else if(lyric&&!/^\[[a-z]+:/i.test(lyric))out.push({t:-1,x:lyric,words:[]});
  });
  timed=hasTime;if(hasTime)out.sort((a,b)=>a.t-b.t);
  return out.filter(x=>!hasTime||x.t>=0);
 }
 function showLyrics(source){
  lines=parseLyrics(source);lyricIndex=-1;const box=$('lyr');box.innerHTML='';
- lines.forEach(line=>{const p=document.createElement('p');p.textContent=line.x;if(timed)p.onclick=()=>{au.currentTime=line.t};box.appendChild(p)});
+ lines.forEach(line=>{
+  const p=document.createElement('p');
+  if(line.words&&line.words.length){
+   line.words.forEach(word=>{
+    const span=document.createElement('span');span.className='lyric-word';span.dataset.t=word.t;span.textContent=word.x;p.appendChild(span);
+   });
+  }else p.textContent=line.x;
+  if(timed)p.onclick=()=>{au.currentTime=line.t};box.appendChild(p);
+ });
  if(!lines.length)box.innerHTML='<p>등록된 가사가 없습니다</p>';
 }
 function render(){
@@ -221,11 +248,21 @@ au.ontimeupdate=()=>{$('cur').textContent=fmt(au.currentTime);if(au.duration&&do
 $('vol').oninput=e=>au.volume=Number(e.target.value)/100;
 $('seek').oninput=e=>{if(au.duration)au.currentTime=Number(e.target.value)/1000*au.duration};
 function syncLyrics(){
- if(!timed)return;let found=-1;const t=au.currentTime+.12;
+ if(!timed)return;let found=-1;const t=au.currentTime+.035;
  for(let i=0;i<lines.length;i++){if(lines[i].t<=t)found=i;else break}
- if(found===lyricIndex)return;lyricIndex=found;const nodes=$('lyr').children;
- [...nodes].forEach((node,i)=>node.classList.toggle('on',i===found));
- if(found>=0)$('lyr').scrollTop=nodes[found].offsetTop-$('lyr').clientHeight/2+nodes[found].clientHeight/2;
+ const nodes=$('lyr').children;
+ if(found!==lyricIndex){
+  lyricIndex=found;
+  [...nodes].forEach((node,i)=>node.classList.toggle('on',i===found));
+  if(found>=0)$('lyr').scrollTop=nodes[found].offsetTop-$('lyr').clientHeight/2+nodes[found].clientHeight/2;
+ }
+ // Highlight the currently sung word when word-level timestamps are available.
+ if(found>=0&&lines[found].words&&lines[found].words.length){
+  const words=lines[found].words;let active=-1;
+  for(let i=0;i<words.length;i++){if(words[i].t<=t)active=i;else break}
+  const spans=nodes[found].querySelectorAll('.lyric-word');
+  spans.forEach((span,i)=>span.classList.toggle('word-on',i===active));
+ }
 }
 let previous=performance.now();
 function animate(now){
