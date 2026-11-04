@@ -246,11 +246,11 @@ function showLyrics(source,trackIndex){
   });
  }
  if(trackIndex===2){
-  // Keep the standalone "From" cue around 01:17 and remove the repeated
-  // opening "From [the]" from the following "inside out" cue.
+  // Keep a standalone "From" cue and remove its repeated opening from the
+  // following "inside out" cue in both the 01:17 and 03:17 passages.
   lines.forEach(line=>{
    const lyric=line.x.replace(/\s+/g,' ').trim().toLowerCase();
-   if(line.t>=65&&line.t<=95&&lyric==='from the'){
+   if(((line.t>=65&&line.t<=95)||(line.t>=185&&line.t<=210))&&lyric==='from the'){
     line.x='From';
     if(line.words&&line.words.length){
      const first=line.words.find(word=>/^\s*from\b/i.test(word.x));
@@ -259,7 +259,7 @@ function showLyrics(source,trackIndex){
    }
   });
   const standaloneFromTimes=lines
-   .filter(line=>line.t>=65&&line.t<=95&&line.x.replace(/\s+/g,' ').trim().toLowerCase()==='from')
+   .filter(line=>((line.t>=65&&line.t<=95)||(line.t>=185&&line.t<=210))&&line.x.replace(/\s+/g,' ').trim().toLowerCase()==='from')
    .map(line=>line.t);
   const removeOpeningFrom=line=>{
    const raw=line.words&&line.words.length?line.words.map(word=>word.x).join(''):line.x;
@@ -279,7 +279,7 @@ function showLyrics(source,trackIndex){
    }
   };
   lines.forEach(line=>{
-   if(line.t<65||line.t>95)return;
+   if(!((line.t>=65&&line.t<=95)||(line.t>=185&&line.t<=210)))return;
    let lyric=line.x.replace(/\s+/g,' ').trim();
    // Repair a doubled opening inside a single source cue first.
    if(/^from\s+from(?:\s+the)?\s+inside\s+out$/i.test(lyric)){
