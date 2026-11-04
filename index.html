@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.055);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#e7dafa;--accent2:#c7b4e9}
+:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.10);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#e7dafa;--accent2:#c7b4e9}
 *{box-sizing:border-box}
 html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
 body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#494354 0%,#282530 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
@@ -38,7 +38,7 @@ button,input{font:inherit}
 .pl-row:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .pl-row .pl-tag{min-width:54px;text-align:right}
 .pl-row.on .pl-tag{font-weight:700}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:19px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:19px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
 .player{padding:18px 18px 15px}
 .track-meta{min-width:0}
 .eyebrow{font-size:10px;letter-spacing:.2em;color:var(--accent2);text-transform:uppercase;margin-bottom:6px}
@@ -191,18 +191,16 @@ function showLyrics(source,trackIndex){
   });
  }
  if(trackIndex===2){
-  // Correct the duplicated lyric: place "From inside out" at the timestamp
-  // where "From the" currently appears, then remove its later duplicate.
-  for(let i=0;i<lines.length-1;i++){
-   const current=lines[i].x.replace(/\\s+/g,' ').trim().toLowerCase();
-   const next=lines[i+1].x.replace(/\\s+/g,' ').trim().toLowerCase();
-   if(current==='from the'&&next==='from inside out'){
-    lines[i].x='From inside out';
-    lines[i].words=[];
-    lines.splice(i+1,1);
-    break;
+  // Correct every "From the" occurrence without deleting any lyric line.
+  // Keep its original timestamp so the word highlight remains synchronized.
+  lines.forEach(line=>{
+   if(line.x.replace(/\\s+/g,' ').trim().toLowerCase()==='from the'){
+    line.x='From inside out';
+    if(line.words&&line.words.length){
+     line.words=[{t:line.words[0].t,x:'From inside out'}];
+    }
    }
-  }
+  });
  }
  if(trackIndex===1){
   // Repair the opening word after parsing, where FLAC word timestamps may split it.
