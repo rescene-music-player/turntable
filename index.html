@@ -101,11 +101,11 @@ button{border:0;color:var(--ink);cursor:pointer}
 const $=id=>document.getElementById(id),au=new Audio(),NS='http://www.w3.org/2000/svg';
 const groove=$('grv');if(groove){for(let r=76;r<184;r+=4){const c=document.createElementNS(NS,'circle');c.setAttribute('r',r);c.setAttribute('stroke-width',r%12?.6:1.4);groove.appendChild(c)}}
 const tracks=[
- {n:'Finest Thing',a:'tracks/01.flac',l:'tracks/01.lrc'},
- {n:'With',a:'tracks/02.flac',l:'tracks/02.lrc'},
- {n:'백화요란(Inside Out)',a:'tracks/03.flac',l:'tracks/03.lrc'},
- {n:'MEME',a:'tracks/04.flac',l:'tracks/04.lrc'},
- {n:'Dragon',a:'tracks/05.flac',l:'tracks/05.lrc'}
+ {n:'Finest Thing',a:'tracks/01.flac'},
+ {n:'With',a:'tracks/02.flac'},
+ {n:'백화요란(Inside Out)',a:'tracks/03.flac'},
+ {n:'MEME',a:'tracks/04.flac'},
+ {n:'Dragon',a:'tracks/05.flac'}
 ];
 let current=-1,lines=[],lyricIndex=-1,timed=false,angle=0,speed=0,armAngle=0;
 const fmt=s=>Number.isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
@@ -137,11 +137,54 @@ function render(){
   row.append(num,name,tag);row.onclick=()=>playTrack(i);list.appendChild(row);
  });
 }
+async function readFlacLyrics(path){
+ const readComments=buffer=>{
+  const bytes=new Uint8Array(buffer),view=new DataView(buffer);
+  if(bytes.length<8||String.fromCharCode(...bytes.slice(0,4))!=='fLaC')return null;
+  let pos=4;
+  while(pos+4<=bytes.length){
+   const header=bytes[pos],type=header&127;
+   const size=(bytes[pos+1]<<16)|(bytes[pos+2]<<8)|bytes[pos+3];
+   const begin=pos+4,finish=begin+size;
+   if(finish>bytes.length)return null;
+   if(type===4){
+    let p=begin;
+    const vendorLen=view.getUint32(p,true);p+=4+vendorLen;
+    if(p+4>finish)return null;
+    const count=view.getUint32(p,true);p+=4;
+    const tags={};
+    for(let i=0;i<count&&p+4<=finish;i++){
+     const len=view.getUint32(p,true);p+=4;
+     if(p+len>finish)return null;
+     const item=new TextDecoder('utf-8').decode(bytes.subarray(p,p+len));p+=len;
+     const eq=item.indexOf('=');
+     if(eq>0)tags[item.slice(0,eq).toUpperCase()]=item.slice(eq+1);
+    }
+    return tags.SYNCEDLYRICS||tags.LYRICS||tags.UNSYNCEDLYRICS||'';
+   }
+   pos=finish;
+   if(header&128)break;
+  }
+  return null;
+ };
+ try{
+  let response=await fetch(path,{headers:{Range:'bytes=0-1048575'}});
+  if(!response.ok)throw new Error('FLAC metadata fetch failed');
+  let buffer=await response.arrayBuffer(),lyrics=readComments(buffer);
+  if(lyrics===null){
+   response=await fetch(path);
+   if(!response.ok)throw new Error('FLAC fetch failed');
+   buffer=await response.arrayBuffer();lyrics=readComments(buffer);
+  }
+  return lyrics||'';
+ }catch(error){console.warn('내장 가사를 읽지 못했습니다:',error);return ''}
+}
 function playTrack(i){
  if(i<0||i>=tracks.length)return;
  current=i;const track=tracks[i];au.src=track.a;
  $('ttl').textContent=track.n;$('cur').textContent='0:00';$('seek').value=0;
- fetch(track.l).then(r=>r.ok?r.text():'').then(text=>{if(current===i){if(text)showLyrics(text);else $('lyr').innerHTML='<p>이 곡의 가사가 준비되지 않았습니다</p>'}});
+ $('lyr').innerHTML='<p>내장 가사를 읽는 중입니다</p>';
+ readFlacLyrics(track.a).then(text=>{if(current===i){if(text)showLyrics(text);else $('lyr').innerHTML='<p>이 FLAC 파일에 읽을 수 있는 가사 태그가 없습니다</p>'}});
  au.play().catch(()=>{$('play').textContent='▶'});
  render();
 }
