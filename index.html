@@ -201,6 +201,16 @@ function showLyrics(source,trackIndex){
     }
    }
   });
+  // The embedded lyrics contain a repeated "From inside out" cue around 03:17.
+  // Remove only a nearby duplicate; a later intentional repeat remains untouched.
+  const keptFromInsideOut=[];
+  lines=lines.filter(line=>{
+   const lyric=line.x.replace(/\s+/g,' ').trim().toLowerCase();
+   if(lyric!=='from inside out')return true;
+   if(keptFromInsideOut.some(t=>Math.abs(line.t-t)<5))return false;
+   keptFromInsideOut.push(line.t);
+   return true;
+  });
  }
  if(trackIndex===1){
   // Repair the opening word after parsing, where FLAC word timestamps may split it.
