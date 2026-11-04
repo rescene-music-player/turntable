@@ -191,22 +191,24 @@ function showLyrics(source,trackIndex){
   });
  }
  if(trackIndex===1){
-  // Correct every parsed occurrence, including word-synced lyric fragments.
+  // Repair the opening word after parsing, where FLAC word timestamps may split it.
   lines.forEach(line=>{
-   line.x=line.x.replace(/\bou\b/gi,'you');
    if(line.words&&line.words.length){
-    // FLAC word-sync can split "Ou" into separate "O" + "u" fragments.
-    for(let i=0;i<line.words.length;i++){
-     const a=line.words[i],b=line.words[i+1];
-     if(a&&b&&/^o$/i.test(a.x.trim())&&/^u$/i.test(b.x.trim())){
-      a.x='You';b.x='';
-      continue;
+    const first=line.words.findIndex(word=>word.x.trim());
+    if(first>=0){
+     const a=line.words[first],b=line.words[first+1];
+     if(/^o$/i.test(a.x.trim())&&b&&/^u(?:\\b|['’])/i.test(b.x.trim())){
+      a.x='You'+b.x.trim().slice(1);
+      b.x='';
+     }else{
+      a.x=a.x.replace(/^ou(?=\\b|['’])/i,'You');
      }
-     a.x=a.x.replace(/\bou\b/gi,'you');
     }
     line.words=line.words.filter(word=>word.x);
-    line.x=line.words.map(word=>word.x).join('').replace(/\s+/g,' ').trim();
+    line.x=line.words.map(word=>word.x).join('').replace(/\\s+/g,' ').trim();
    }
+   // Final guard for line-synced lyrics and the first displayed word.
+   line.x=line.x.replace(/^ou(?=\\b|['’])/i,'You');
   });
  }
  lyricIndex=-1;const box=$('lyr');box.innerHTML='';
