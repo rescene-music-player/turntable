@@ -97,8 +97,8 @@ button{border:0;color:var(--ink);cursor:pointer}
   <radialGradient id="label" cx=".34" cy=".25"><stop stop-color="#eee5dc"/><stop offset=".75" stop-color="#c8b8aa"/><stop offset="1" stop-color="#9b8372"/></radialGradient>
   <radialGradient id="knob" cx=".3" cy=".25"><stop stop-color="#fff"/><stop offset=".3" stop-color="#aeb4bb"/><stop offset="1" stop-color="#343a42"/></radialGradient>
   <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="11"/></filter>
-  <clipPath id="recordClip"><circle cx="298" cy="255" r="169"/></clipPath>
-  <clipPath id="albumLabel"><circle cx="298" cy="255" r="55"/></clipPath>
+  <clipPath id="recordClip"><circle cx="0" cy="0" r="169"/></clipPath>
+  <clipPath id="albumLabel"><circle cx="0" cy="0" r="55"/></clipPath>
  </defs>
  <ellipse cx="350" cy="498" rx="292" ry="27" fill="#000" opacity=".38" filter="url(#shadow)"/>
  <path d="M35 430H665V472Q665 493 646 493H54Q35 493 35 472Z" fill="url(#woodFront)" stroke="#47291f" stroke-width="2"/>
@@ -443,7 +443,10 @@ function syncLyrics(){
   }
   lyricIndex=found;activeWordIndex=-1;
   [...nodes].forEach((node,i)=>node.classList.toggle('on',i===found));
-  if(found>=0)lyricScrollTarget=Math.max(0,nodes[found].offsetTop-$('lyr').clientHeight/2+nodes[found].clientHeight/2);
+  if(found>=0){
+   const box=$('lyr'),boxRect=box.getBoundingClientRect(),lineRect=nodes[found].getBoundingClientRect();
+   lyricScrollTarget=Math.max(0,box.scrollTop+lineRect.top-boxRect.top-box.clientHeight/2+lineRect.height/2);
+  }
  }
  if(found>=0&&lines[found].words&&lines[found].words.length){
   const words=lines[found].words;let active=-1;
