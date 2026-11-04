@@ -246,12 +246,11 @@ function showLyrics(source,trackIndex){
   });
  }
  if(trackIndex===2){
-  // At about 01:17 the source has a standalone "From" cue followed by
-  // another cue beginning "From the inside out". Keep the first cue and
-  // strip only the repeated "From the" prefix from the following cue.
+  // Keep the standalone "From" cue around 01:17 and remove the repeated
+  // opening "From [the]" from the following "inside out" cue.
   lines.forEach(line=>{
    const lyric=line.x.replace(/\s+/g,' ').trim().toLowerCase();
-   if(lyric==='from the'){
+   if(line.t>=65&&line.t<=95&&lyric==='from the'){
     line.x='From';
     if(line.words&&line.words.length){
      const first=line.words.find(word=>/^\s*from\b/i.test(word.x));
@@ -260,31 +259,38 @@ function showLyrics(source,trackIndex){
    }
   });
   const standaloneFromTimes=lines
-   .filter(line=>line.t>=65&&line.t<=95&&line.x.trim().toLowerCase()==='from')
+   .filter(line=>line.t>=65&&line.t<=95&&line.x.replace(/\s+/g,' ').trim().toLowerCase()==='from')
    .map(line=>line.t);
-  lines.forEach(line=>{
-   const lyric=line.x.replace(/\s+/g,' ').trim();
-   if(line.t<65||line.t>95||!/^from\s+the\s+inside\s+out$/i.test(lyric))return;
-   if(!standaloneFromTimes.some(t=>Math.abs(line.t-t)<=5))return;
+  const removeOpeningFrom=line=>{
+   const raw=line.words&&line.words.length?line.words.map(word=>word.x).join(''):line.x;
+   const prefix=raw.match(/^\s*from\s+(?:the\s+)?/i);
+   if(!prefix)return;
    if(line.words&&line.words.length){
-    let stage=0;
-    const kept=[];
-    line.words.forEach(word=>{
-     let x=word.x;
-     if(stage===0){
-      const m=x.match(/^\s*from\b\s*/i);
-      if(m){x=x.slice(m[0].length);stage=1;}
-     }
-     if(stage===1){
-      const m=x.match(/^\s*the\b\s*/i);
-      if(m){x=x.slice(m[0].length);stage=2;}
-     }
-     if(x)kept.push({...word,x});
-    });
-    line.words=kept;
-    line.x=kept.map(word=>word.x).join('').replace(/\s+/g,' ').trim();
+    let remaining=prefix[0].length;
+    line.words=line.words.map(word=>{
+     if(remaining<=0)return word;
+     const count=Math.min(remaining,word.x.length);
+     remaining-=count;
+     return {...word,x:word.x.slice(count)};
+    }).filter(word=>word.x);
+    line.x=line.words.map(word=>word.x).join('').replace(/\s+/g,' ').trim();
    }else{
-    line.x=line.x.replace(/^from\s+the\s+/i,'');
+    line.x=line.x.replace(/^\s*from\s+(?:the\s+)?/i,'').trim();
+   }
+  };
+  lines.forEach(line=>{
+   if(line.t<65||line.t>95)return;
+   let lyric=line.x.replace(/\s+/g,' ').trim();
+   // Repair a doubled opening inside a single source cue first.
+   if(/^from\s+from(?:\s+the)?\s+inside\s+out$/i.test(lyric)){
+    removeOpeningFrom(line);
+    lyric=line.x.replace(/\s+/g,' ').trim();
+   }
+   // The preceding standalone cue already supplies "From". The next cue
+   // should show only "inside out", with or without a tagged "the".
+   if(/^from(?:\s+the)?\s+inside\s+out$/i.test(lyric)&&
+      standaloneFromTimes.some(t=>Math.abs(line.t-t)<=5)){
+    removeOpeningFrom(line);
    }
   });
   // Around 03:17 the complete phrase is duplicated. Keep the first cue
