@@ -163,8 +163,36 @@ function parseLyrics(source){
  timed=hasTime;if(hasTime)out.sort((a,b)=>a.t-b.t);
  return out.filter(x=>!hasTime||x.t>=0);
 }
-function showLyrics(source){
- lines=parseLyrics(source);lyricIndex=-1;const box=$('lyr');box.innerHTML='';
+function showLyrics(source,trackIndex){
+ lines=parseLyrics(source);
+ // Normalize the final parsed text so corrections affect both line and word-synced lyrics.
+ lines.forEach(line=>{
+  line.x=line.x.replace(/[\[\]]/g,'');
+  if(line.words&&line.words.length)line.words.forEach(word=>{word.x=word.x.replace(/[\[\]]/g,'')});
+ });
+ if(trackIndex===0){
+  lines.forEach(line=>{
+   line.x=line.x.replace(/\bthing\]/gi,'thing');
+   if(line.words)line.words.forEach(word=>{word.x=word.x.replace(/\bthing\]/gi,'thing')});
+  });
+ }
+ if(trackIndex===1){
+  let fixed=false;
+  for(const line of lines){
+   if(fixed)break;
+   if(line.words&&line.words.length){
+    for(const word of line.words){
+     const corrected=word.x.replace(/^(\s*)ou\b/i,'$1you');
+     if(corrected!==word.x){word.x=corrected;fixed=true;break}
+    }
+    line.x=line.words.map(word=>word.x).join('').replace(/\s+/g,' ').trim();
+   }else{
+    const corrected=line.x.replace(/^(\s*)ou\b/i,'$1you');
+    if(corrected!==line.x){line.x=corrected;fixed=true}
+   }
+  }
+ }
+ lyricIndex=-1;const box=$('lyr');box.innerHTML='';
  lines.forEach(line=>{
   const p=document.createElement('p');
   if(line.words&&line.words.length){
@@ -244,7 +272,7 @@ function playTrack(i){
  current=i;const track=tracks[i];au.src=track.a;
  $('ttl').textContent=track.n;$('cur').textContent='0:00';$('seek').value=0;
  $('lyr').innerHTML='<p>내장 가사를 읽는 중입니다</p>';
- readFlacLyrics(track.a).then(text=>{if(current===i){if(text)showLyrics(correctTrackLyrics(i,text));else $('lyr').innerHTML='<p>이 FLAC 파일에 읽을 수 있는 가사 태그가 없습니다</p>'}});
+ readFlacLyrics(track.a).then(text=>{if(current===i){if(text)showLyrics(correctTrackLyrics(i,text),i);else $('lyr').innerHTML='<p>이 FLAC 파일에 읽을 수 있는 가사 태그가 없습니다</p>'}});
  au.play().catch(()=>{$('play').textContent='▶'});
  render();
 }
