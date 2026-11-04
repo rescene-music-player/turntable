@@ -346,7 +346,7 @@ function animate(now){
  if(speed<.2&&!playing)speed=0;angle=(angle+speed*dt)%360;
  $('disc').setAttribute('transform','rotate('+angle.toFixed(2)+' 230 250)');
  const progress=au.duration?au.currentTime/au.duration:0;
- const target=playing?15+22*progress:15;armAngle+=(target-armAngle)*Math.min(1,dt*4);
+ const target=playing?15+15*progress:15;armAngle+=(target-armAngle)*Math.min(1,dt*4);
  armLift+=((playing?0:-8)-armLift)*Math.min(1,dt*5);
  $('arm').setAttribute('transform','translate(440 60) rotate('+armAngle.toFixed(2)+') translate(0 '+armLift.toFixed(2)+')');
  $('deck').classList.toggle('is-playing',playing);
