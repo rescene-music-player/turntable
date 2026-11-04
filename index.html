@@ -191,13 +191,13 @@ function showLyrics(source,trackIndex){
   });
  }
  if(trackIndex===2){
-  // Correct every "From the" occurrence without deleting any lyric line.
-  // Keep its original timestamp so the word highlight remains synchronized.
+  // Keep "From" on its own cue; the following "inside out" stays on its original cue.
   lines.forEach(line=>{
-   if(line.x.replace(/\\s+/g,' ').trim().toLowerCase()==='from the'){
-    line.x='From inside out';
+   if(line.x.replace(/\s+/g,' ').trim().toLowerCase()==='from the'){
+    line.x='From';
     if(line.words&&line.words.length){
-     line.words=[{t:line.words[0].t,x:'From inside out'}];
+     const first=line.words.find(word=>word.x.trim());
+     line.words=first?[{t:first.t,x:'From'}]:[];
     }
    }
   });
