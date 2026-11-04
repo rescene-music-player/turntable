@@ -1,40 +1,65 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="utf-8">
+<html lang="ko">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PULSE Turntable</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#17151d">
+<title>RESCENE · PULSE Turntable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg1:#4a4757;--bg2:#17161c;--ink:#f3f0f8;--mute:#a9a4b8;--panel:rgba(255,255,255,.07);--line:rgba(255,255,255,.14);--acc:#e6dcff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.055);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#e7dafa;--accent2:#c7b4e9}
 *{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;min-height:100vh;background:radial-gradient(120% 80% at 50% 0%,var(--bg1),var(--bg2) 70%) fixed;color:var(--ink);font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
-.wrap{max-width:520px;margin:0 auto;padding:16px 16px 28px}
-.top{display:flex;justify-content:space-between;align-items:baseline;font-family:"Cormorant Garamond",Georgia,serif;font-size:22px;letter-spacing:.04em;color:var(--acc)}
-.top small{font-size:15px;font-style:italic;color:var(--mute)}
-svg.deck{width:100%;height:auto;display:block;margin:10px 0;filter:drop-shadow(0 24px 30px rgba(0,0,0,.55));cursor:pointer}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;backdrop-filter:blur(10px)}
-.title{font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sub{font-size:12px;color:var(--mute);margin-top:2px;letter-spacing:.05em}
-.seek{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
-input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:var(--line);flex:1;outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--acc);border:0}
-input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--acc);border:0}
-.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
-button{font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px}
-button:hover{background:var(--panel)}
-#play{width:56px;height:56px;padding:0;background:var(--acc);color:#22202b;border:0;font-size:20px}
-.vol{display:flex;align-items:center;gap:8px;width:120px;font-size:13px;color:var(--mute)}
-.lyr{margin-top:12px;height:190px;overflow-y:auto;scroll-behavior:smooth;text-align:center;padding:70px 8px;-webkit-mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);mask-image:linear-gradient(transparent,#000 28%,#000 72%,transparent);scrollbar-width:none}
-.lyr::-webkit-scrollbar{display:none}
-.lyr p{margin:0;padding:6px 0;font-size:15px;color:var(--mute);opacity:.55;transition:.3s;cursor:pointer}
-.lyr p.on{color:#fff;opacity:1;font-size:19px;font-weight:600;text-shadow:0 0 18px rgba(230,220,255,.55)}
-.lyr.plain p{opacity:.9;cursor:default}
-.hint{font-size:12px;color:var(--mute);text-align:center;margin-top:10px}
-details{margin-top:10px;font-size:13px;color:var(--mute)}
-textarea{width:100%;height:90px;margin-top:8px;background:rgba(0,0,0,.25);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px;font:12px/1.4 ui-monospace,monospace}
-.pl{margin-top:12px;padding:6px}.pl div{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;font-size:13px;cursor:pointer;color:var(--ink)}.pl div.on{background:rgba(230,220,255,.16)}.pl div.miss{opacity:.45}.pl b{width:18px;font-weight:500;text-align:center;color:var(--mute)}.pl span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pl i{font-style:normal;font-size:11px;color:var(--mute)}
-</style></head><body><div class="wrap">
-<div class="top"><span>Rescene</span><small>Pulse · 4th Mini Album</small></div>
+html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
+body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#494354 0%,#282530 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
+button,input{font:inherit}
+.wrap{width:min(100% - 32px,520px);margin:0 auto;padding:25px 0 34px}
+.top{display:flex;align-items:center;justify-content:space-between;margin:0 2px 14px}
+.brand{font-family:"Cormorant Garamond",Georgia,serif;font-size:29px;letter-spacing:.09em;color:var(--accent);line-height:1}
+.album{text-align:right;color:var(--muted);font-family:"Cormorant Garamond",Georgia,serif;font-size:16px;font-style:italic;letter-spacing:.04em}
+.deck{width:100%;height:auto;display:block;margin:0 auto 16px;filter:drop-shadow(0 22px 26px rgba(0,0,0,.42))}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:19px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.player{padding:18px 18px 15px}
+.track-meta{min-width:0}
+.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--accent2);text-transform:uppercase;margin-bottom:6px}
+.title{font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.08em}
+.seek{display:flex;align-items:center;gap:10px;margin-top:18px;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+input[type=range]{appearance:none;-webkit-appearance:none;height:3px;border-radius:4px;background:rgba(255,255,255,.18);outline:none;min-width:0}
+#seek{flex:1}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(231,218,250,.12)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--accent)}
+.controls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-top:16px}
+.transport{display:flex;align-items:center;justify-content:center;gap:13px}
+button{border:0;color:var(--ink);cursor:pointer}
+.transport button{width:34px;height:34px;padding:0;background:transparent;color:#d9d2e2;font-size:19px;border-radius:50%}
+.transport button:active{background:rgba(255,255,255,.1)}
+#play{width:50px;height:50px;border-radius:50%;background:var(--accent);color:#24202d;font-size:19px;box-shadow:0 5px 18px rgba(0,0,0,.2)}
+.volume{display:flex;align-items:center;justify-content:flex-end;gap:7px;color:var(--muted);font-size:14px}
+#vol{width:66px}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;padding:0 3px;margin:22px 2px 10px}
+.section-head strong{font-size:12px;letter-spacing:.16em;font-weight:600}
+.section-head span{font-family:"Cormorant Garamond",Georgia,serif;font-size:14px;color:var(--muted);font-style:italic}
+.lyrics{height:190px;overflow-y:auto;text-align:center;padding:47px 14px;scrollbar-width:none;mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
+.lyrics::-webkit-scrollbar{display:none}
+.lyrics p{margin:0;padding:6px 0;font-size:14px;line-height:1.65;color:var(--muted);opacity:.58;transition:color .25s,opacity .25s,transform .25s}
+.lyrics p.on{color:#fff;opacity:1;font-size:17px;font-weight:600;transform:scale(1.02);text-shadow:0 0 18px rgba(231,218,250,.38)}
+.playlist{padding:7px}
+.pl-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 11px;border-radius:12px;cursor:pointer;transition:background .2s}
+.pl-row+.pl-row{margin-top:2px}
+.pl-row:hover{background:rgba(255,255,255,.045)}
+.pl-row.on{background:rgba(231,218,250,.12)}
+.pl-num{font-family:"Cormorant Garamond",Georgia,serif;font-size:17px;color:var(--muted);text-align:center}
+.pl-name{min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-tag{font-size:10px;color:var(--muted);letter-spacing:.08em}
+.pl-row.on .pl-num,.pl-row.on .pl-name,.pl-row.on .pl-tag{color:var(--accent)}
+@media(max-width:380px){.wrap{width:calc(100% - 24px);padding-top:17px}.player{padding:15px}.title{font-size:17px}.volume{gap:4px}#vol{width:52px}.transport{gap:8px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand">RESCENE</div><div class="album">PULSE · 4th Mini Album</div></header>
 <svg class="deck" id="deck" viewBox="0 0 500 500" aria-label="턴테이블">
 <defs>
 <linearGradient id="pl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8c889b"/><stop offset=".5" stop-color="#6d6a7c"/><stop offset="1" stop-color="#4d4a5b"/></linearGradient>
@@ -58,88 +83,99 @@ textarea{width:100%;height:90px;margin-top:8px;background:rgba(0,0,0,.25);color:
 <circle cx="425" cy="70" r="30" fill="url(#mt)" stroke="rgba(0,0,0,.3)"/>
 <g id="arm"><rect x="412" y="20" width="26" height="36" rx="5" fill="#2b2935"/><rect x="419" y="56" width="12" height="290" rx="6" fill="url(#arm)"/><path d="M414 330h22l-3 30-8 8-8-8z" fill="#2b2935"/><circle cx="425" cy="70" r="12" fill="#2b2935"/></g>
 </svg>
-<div class="card">
-<div class="title" id="ttl">음원 파일을 불러오세요</div>
-<div class="sub" id="sub">RESCENE · PULSE · 33⅓ RPM</div>
-<div class="seek"><span id="cur">0:00</span><input type="range" id="seek" min="0" max="1000" value="0"><span id="dur">0:00</span></div>
-<div class="row"><button id="load">불러오기</button><div style="display:flex;gap:8px;align-items:center"><button id="prev" aria-label="이전 곡">⏮</button><button id="play" aria-label="재생">▶</button><button id="next" aria-label="다음 곡">⏭</button></div><div class="vol">♪<input type="range" id="vol" min="0" max="100" value="80"></div></div>
-<input type="file" id="file" multiple accept="audio/*,.mp3,.flac,.m4a,.wav,.ogg,.lrc,.txt" hidden>
-</div>
-<div class="card lyr" id="lyr"><p>음원과 함께 .lrc 가사 파일을 선택하면<br>여기에 싱크 가사가 표시돼요</p></div>
-<div class="card pl" id="pl"></div>
-<details><summary>가사 직접 붙여넣기</summary><textarea id="ta" placeholder="[00:12.30] 가사 한 줄&#10;[00:16.80] 다음 줄"></textarea><button id="apply" style="margin-top:6px">적용</button></details>
-<div class="hint">곡을 눌러 재생하세요 · 다른 파일은 불러오기로 추가할 수 있어요</div>
+<section class="panel player" aria-label="음악 재생 컨트롤">
+  <div class="track-meta"><div class="eyebrow">Now Playing</div><div class="title" id="ttl">곡을 선택해 주세요</div><div class="sub">RESCENE · PULSE · 33⅓ RPM</div></div>
+  <div class="seek"><span id="cur">0:00</span><input type="range" id="seek" min="0" max="1000" value="0" aria-label="재생 위치"><span id="dur">0:00</span></div>
+  <div class="controls">
+    <span></span>
+    <div class="transport"><button id="prev" aria-label="이전 곡">⏮</button><button id="play" aria-label="재생">▶</button><button id="next" aria-label="다음 곡">⏭</button></div>
+    <div class="volume"><span>♪</span><input type="range" id="vol" min="0" max="100" value="80" aria-label="음량"></div>
+  </div>
+</section>
+<div class="section-head"><strong>LYRICS</strong><span>Sing along</span></div>
+<section class="panel lyrics" id="lyr"><p>재생목록에서 곡을 선택하면<br>싱크 가사가 표시됩니다</p></section>
+<div class="section-head"><strong>TRACKLIST</strong><span>05 Tracks</span></div>
+<section class="panel playlist" id="pl" aria-label="재생목록"></section>
 </div>
 <script>
 const $=id=>document.getElementById(id),au=new Audio(),NS='http://www.w3.org/2000/svg';
-const g=$('grv');for(let r=76;r<184;r+=4){const c=document.createElementNS(NS,'circle');c.setAttribute('r',r);c.setAttribute('stroke-width',r%12?.6:1.4);g.appendChild(c)}
-let ang=0,spd=0,armA=0,lines=[],idx=-1,timed=false;
-const fmt=s=>isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
+const groove=$('grv');if(groove){for(let r=76;r<184;r+=4){const c=document.createElementNS(NS,'circle');c.setAttribute('r',r);c.setAttribute('stroke-width',r%12?.6:1.4);groove.appendChild(c)}}
+const tracks=[
+ {n:'Finest Thing',a:'tracks/01.flac',l:'tracks/01.lrc'},
+ {n:'With',a:'tracks/02.flac',l:'tracks/02.lrc'},
+ {n:'백화요란(Inside Out)',a:'tracks/03.flac',l:'tracks/03.lrc'},
+ {n:'MEME',a:'tracks/04.flac',l:'tracks/04.lrc'},
+ {n:'Dragon',a:'tracks/05.flac',l:'tracks/05.lrc'}
+];
+let current=-1,lines=[],lyricIndex=-1,timed=false,angle=0,speed=0,armAngle=0;
+const fmt=s=>Number.isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
 au.volume=.8;
-function toggle(){if(!au.src)return $('file').click();au.paused?au.play():au.pause()}
-$('play').onclick=$('deck').onclick=toggle;$('load').onclick=()=>$('file').click();
-au.onplay=()=>$('play').textContent='❚❚';au.onpause=()=>$('play').textContent='▶';
+function parseLyrics(source){
+ const out=[];let hasTime=false;
+ source.split(/\r?\n/).forEach(line=>{
+  const re=/\[(\d+):(\d+(?:\.\d+)?)\]/g;let match,times=[];
+  while((match=re.exec(line)))times.push(Number(match[1])*60+Number(match[2]));
+  const lyric=line.replace(re,'').trim();
+  if(times.length){hasTime=true;if(lyric)times.forEach(t=>out.push({t,x:lyric}))}
+  else if(lyric&&!/^\[[a-z]+:/i.test(lyric))out.push({t:-1,x:lyric});
+ });
+ timed=hasTime;if(hasTime)out.sort((a,b)=>a.t-b.t);
+ return out.filter(x=>!hasTime||x.t>=0);
+}
+function showLyrics(source){
+ lines=parseLyrics(source);lyricIndex=-1;const box=$('lyr');box.innerHTML='';
+ lines.forEach(line=>{const p=document.createElement('p');p.textContent=line.x;if(timed)p.onclick=()=>{au.currentTime=line.t};box.appendChild(p)});
+ if(!lines.length)box.innerHTML='<p>등록된 가사가 없습니다</p>';
+}
+function render(){
+ const list=$('pl');list.innerHTML='';
+ tracks.forEach((track,i)=>{
+  const row=document.createElement('div');row.className='pl-row'+(i===current?' on':'');
+  const num=document.createElement('span');num.className='pl-num';num.textContent=String(i+1).padStart(2,'0');
+  const name=document.createElement('span');name.className='pl-name';name.textContent=track.n;
+  const tag=document.createElement('span');tag.className='pl-tag';tag.textContent=i===current?'PLAYING':'FLAC';
+  row.append(num,name,tag);row.onclick=()=>playTrack(i);list.appendChild(row);
+ });
+}
+function playTrack(i){
+ if(i<0||i>=tracks.length)return;
+ current=i;const track=tracks[i];au.src=track.a;
+ $('ttl').textContent=track.n;$('cur').textContent='0:00';$('seek').value=0;
+ fetch(track.l).then(r=>r.ok?r.text():'').then(text=>{if(current===i){if(text)showLyrics(text);else $('lyr').innerHTML='<p>이 곡의 가사가 준비되지 않았습니다</p>'}});
+ au.play().catch(()=>{$('play').textContent='▶'});
+ render();
+}
+function toggle(){if(!au.src){playTrack(0);return}if(au.paused)au.play().catch(()=>{});else au.pause()}
+$('play').onclick=toggle;$('deck').onclick=toggle;
+$('next').onclick=()=>playTrack((current+1+tracks.length)%tracks.length);
+$('prev').onclick=()=>{if(au.currentTime>3)au.currentTime=0;else playTrack((current-1+tracks.length)%tracks.length)};
+au.onended=()=>$('next').click();
+au.onplay=()=>$('play').textContent='Ⅱ';
+au.onpause=()=>$('play').textContent='▶';
 au.onloadedmetadata=()=>$('dur').textContent=fmt(au.duration);
-$('vol').oninput=e=>au.volume=e.target.value/100;
-$('seek').oninput=e=>{au.currentTime=e.target.value/1000*(au.duration||0)};
-function parse(t){
-  const out=[];let any=false;
-  t.split(/\r?\n/).forEach(l=>{
-    const re=/\[(\d+):(\d+(?:\.\d+)?)\]/g;let m,ts=[];
-    while(m=re.exec(l))ts.push(+m[1]*60+ +m[2]);
-    const txt=l.replace(re,'').trim();
-    if(ts.length){any=true;if(txt)ts.forEach(x=>out.push({t:x,x:txt}))}
-    else if(txt&&!/^\[[a-z]+:/i.test(txt))out.push({t:-1,x:txt});
-  });
-  timed=any;if(any)out.sort((a,b)=>a.t-b.t);return out.filter(o=>!any||o.t>=0);
+au.ontimeupdate=()=>{$('cur').textContent=fmt(au.currentTime);if(au.duration&&document.activeElement!==$('seek'))$('seek').value=au.currentTime/au.duration*1000;syncLyrics()};
+$('vol').oninput=e=>au.volume=Number(e.target.value)/100;
+$('seek').oninput=e=>{if(au.duration)au.currentTime=Number(e.target.value)/1000*au.duration};
+function syncLyrics(){
+ if(!timed)return;let found=-1;const t=au.currentTime+.12;
+ for(let i=0;i<lines.length;i++){if(lines[i].t<=t)found=i;else break}
+ if(found===lyricIndex)return;lyricIndex=found;const nodes=$('lyr').children;
+ [...nodes].forEach((node,i)=>node.classList.toggle('on',i===found));
+ if(found>=0)$('lyr').scrollTop=nodes[found].offsetTop-$('lyr').clientHeight/2+nodes[found].clientHeight/2;
 }
-function setLyrics(t){
-  lines=parse(t);idx=-1;const el=$('lyr');el.innerHTML='';el.classList.toggle('plain',!timed);el.scrollTop=0;
-  lines.forEach((l,i)=>{const p=document.createElement('p');p.textContent=l.x;if(timed)p.onclick=()=>{au.currentTime=l.t};el.appendChild(p)});
-  if(!lines.length)el.innerHTML='<p>가사를 찾지 못했어요</p>';
+let previous=performance.now();
+function animate(now){
+ const dt=Math.min(.05,(now-previous)/1000);previous=now;
+ const playing=!au.paused&&!au.ended;
+ speed+=( (playing?200:0)-speed)*Math.min(1,dt*(playing?1.6:1.1));
+ if(speed<.2&&!playing)speed=0;angle=(angle+speed*dt)%360;
+ $('disc').setAttribute('transform','rotate('+angle.toFixed(2)+')');
+ const progress=au.duration?au.currentTime/au.duration:0;
+ const target=playing?14+16*progress:0;armAngle+=(target-armAngle)*Math.min(1,dt*3);
+ $('arm').setAttribute('transform','rotate('+armAngle.toFixed(2)+' 425 70)');
+ requestAnimationFrame(animate);
 }
-function sync(){
-  if(!timed)return;const t=au.currentTime+.15;let i=-1;
-  for(let k=0;k<lines.length;k++){if(lines[k].t<=t)i=k;else break}
-  if(i===idx)return;idx=i;const ps=$('lyr').children;
-  [...ps].forEach((p,k)=>p.classList.toggle('on',k===i));
-  if(i>=0)$('lyr').scrollTop=ps[i].offsetTop-$('lyr').clientHeight/2+ps[i].clientHeight/2;
-}
-const TR=[['Finest Thing','finest'],['With','with'],['백화요란 (Inside Out)','백화요란'],['MEME','meme'],['Dragon','dragon']].map(([n,k])=>({n,k,a:null,l:null}));
-let cur=-1;
-const norm=s=>s.normalize('NFC').toLowerCase().replace(/[\s_]+/g,'');
-function slot(f){const s=norm(f.name);let i=TR.findIndex(t=>t.k&&s.includes(norm(t.k)));if(i<0){TR.push({n:f.name.replace(/\.[^.]+$/,''),k:'',a:null,l:null});i=TR.length-1}return i}
-function render(){const pl=$('pl');pl.innerHTML='';TR.forEach((t,i)=>{const d=document.createElement('div');d.className=(i===cur?'on ':'')+(t.a?'':'miss');d.innerHTML='<b>'+(i+1)+'</b><span></span><i>'+(t.a?(t.l?'♪ 가사':''):'파일 필요')+'</i>';d.children[1].textContent=t.n;d.onclick=()=>t.a?go(i):$('file').click();pl.appendChild(d)})}
-function go(i){cur=i;const t=TR[i];au.src=t.a;$('ttl').textContent=t.n;$('seek').value=0;if(t.l)setLyrics(t.l);else{lines=[];timed=false;$('lyr').classList.remove('plain');$('lyr').innerHTML='<p>이 곡의 .lrc 가사 파일을 함께 선택해 주세요</p>'}au.play().catch(()=>{});render()}
-function step(d){for(let i=cur+d;i>=0&&i<TR.length;i+=d)if(TR[i].a)return go(i)}
-$('next').onclick=()=>step(1);$('prev').onclick=()=>{if(au.currentTime>3)au.currentTime=0;else step(-1)};au.onended=()=>step(1);
-async function handle(files){
-  let first=-1;
-  for(const f of files){
-    if(/\.(lrc|txt)$/i.test(f.name)){const s=norm(f.name);let i=TR.findIndex(t=>t.k&&s.includes(norm(t.k)));if(i<0)i=cur;if(i<0)continue;TR[i].l=await f.text();if(i===cur)setLyrics(TR[i].l)}
-    else if(f.type.startsWith('audio')||/\.(mp3|flac|m4a|wav|ogg|aac)$/i.test(f.name)){const i=slot(f);if(TR[i].a)URL.revokeObjectURL(TR[i].a);TR[i].a=URL.createObjectURL(f);if(first<0||i<first)first=i}
-  }
-  if(first>=0&&(cur<0||au.paused))go(first);else render();
-}
-render();
-TR.slice(0,5).forEach((t,i)=>{const b='tracks/0'+(i+1);t.a=b+'.flac';fetch(b+'.lrc').then(r=>r.ok?r.text():'').then(x=>{if(x){t.l=x;if(i===cur)setLyrics(x);render()}}).catch(()=>{})});
-render();
-$('file').onchange=e=>handle([...e.target.files]);
-addEventListener('dragover',e=>e.preventDefault());
-addEventListener('drop',e=>{e.preventDefault();handle([...e.dataTransfer.files])});
-$('apply').onclick=()=>{const v=$('ta').value;if(cur>=0)TR[cur].l=v;setLyrics(v);render()};
-let last=performance.now();
-function loop(n){
-  const dt=Math.min(.05,(n-last)/1000);last=n;
-  const playing=!au.paused&&!au.ended;
-  spd+=((playing?200:0)-spd)*Math.min(1,dt*(playing?1.6:1.1)); // 33⅓rpm = 200°/s
-  if(spd<.2&&!playing)spd=0;ang=(ang+spd*dt)%360;
-  $('disc').setAttribute('transform','rotate('+ang.toFixed(2)+')');
-  const p=au.duration?au.currentTime/au.duration:0;
-  const tgt=playing?14+16*p:0;armA+=(tgt-armA)*Math.min(1,dt*3);
-  $('arm').setAttribute('transform','rotate('+armA.toFixed(2)+' 425 70)');
-  if(playing||au.seeking){$('cur').textContent=fmt(au.currentTime);if(document.activeElement!==$('seek'))$('seek').value=p*1000}
-  sync();requestAnimationFrame(loop);
-}
-requestAnimationFrame(loop);
-</script></body></html>
+render();requestAnimationFrame(animate);
+</script>
+</body>
+</html>
