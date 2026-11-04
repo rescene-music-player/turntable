@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.055);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#34454d;--accent2:#34454d}
+:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.055);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#e7dafa;--accent2:#c7b4e9}
 *{box-sizing:border-box}
 html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
 body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#494354 0%,#282530 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
@@ -64,7 +64,7 @@ button{border:0;color:var(--ink);cursor:pointer}
 .lyrics::-webkit-scrollbar{display:none}
 .lyrics p{margin:0;padding:6px 0;font-size:14px;line-height:1.65;color:var(--muted);opacity:.58;transition:color .25s,opacity .25s,transform .25s}
 .lyric-word{display:inline;transition:color .12s,text-shadow .12s}
-.lyric-word.word-on{background:linear-gradient(90deg,#fff2b8 0%,#ffd4ec 48%,#c9f1ff 100%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;text-shadow:0 0 14px rgba(255,226,245,.42)}
+.lyric-word.word-on{background:linear-gradient(90deg,#fffbe8 0%,#ffe0f2 38%,#f2dfff 68%,#d8f6ff 100%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;text-shadow:0 0 2px rgba(255,255,255,.95);filter:drop-shadow(0 0 3px rgba(255,255,255,.9)) drop-shadow(0 0 8px rgba(255,190,230,.9)) drop-shadow(0 0 17px rgba(164,220,255,.78))}
 .lyrics p.on{color:#fff;opacity:1;font-size:17px;font-weight:600;transform:scale(1.02);text-shadow:0 0 18px rgba(231,218,250,.38)}
 .playlist{padding:7px}
 .pl-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:10px;padding:12px 11px;border-radius:12px;cursor:pointer;transition:background .2s}
