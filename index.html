@@ -227,12 +227,23 @@ async function readFlacLyrics(path){
   return lyrics||'';
  }catch(error){console.warn('내장 가사를 읽지 못했습니다:',error);return ''}
 }
+function correctTrackLyrics(trackIndex,source){
+ if(trackIndex===0){
+  // Correct a stray closing bracket in the embedded Finest Thing lyric tag.
+  source=source.replace(/\\bthing\\]/gi,'thing');
+ }
+ if(trackIndex===1){
+  // The first word in With's embedded intro is "you", not "ou".
+  source=source.replace(/(^|\\n)(\\s*(?:<\\d+:\\d+(?:\\.\\d+)?>|\\[\\d+:\\d+(?:\\.\\d+)?\\])?\\s*)ou\\b/i,'$1$2you');
+ }
+ return source;
+}
 function playTrack(i){
  if(i<0||i>=tracks.length)return;
  current=i;const track=tracks[i];au.src=track.a;
  $('ttl').textContent=track.n;$('cur').textContent='0:00';$('seek').value=0;
  $('lyr').innerHTML='<p>내장 가사를 읽는 중입니다</p>';
- readFlacLyrics(track.a).then(text=>{if(current===i){if(text)showLyrics(text);else $('lyr').innerHTML='<p>이 FLAC 파일에 읽을 수 있는 가사 태그가 없습니다</p>'}});
+ readFlacLyrics(track.a).then(text=>{if(current===i){if(text)showLyrics(correctTrackLyrics(i,text));else $('lyr').innerHTML='<p>이 FLAC 파일에 읽을 수 있는 가사 태그가 없습니다</p>'}});
  au.play().catch(()=>{$('play').textContent='▶'});
  render();
 }
