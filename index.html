@@ -191,24 +191,55 @@ function showLyrics(source,trackIndex){
   });
  }
  if(trackIndex===2){
-  // Keep "From" on its own cue; the following "inside out" stays on its original cue.
+  // At about 01:17 the source has a standalone "From" cue followed by
+  // another cue beginning "From the inside out". Keep the first cue and
+  // strip only the repeated "From the" prefix from the following cue.
   lines.forEach(line=>{
-   if(line.x.replace(/\s+/g,' ').trim().toLowerCase()==='from the'){
+   const lyric=line.x.replace(/\s+/g,' ').trim().toLowerCase();
+   if(lyric==='from the'){
     line.x='From';
     if(line.words&&line.words.length){
-     const first=line.words.find(word=>word.x.trim());
+     const first=line.words.find(word=>/^\s*from\b/i.test(word.x));
      line.words=first?[{t:first.t,x:'From'}]:[];
     }
    }
   });
-  // The embedded lyrics contain a repeated "From inside out" cue around 03:17.
-  // Remove only a nearby duplicate; a later intentional repeat remains untouched.
-  const keptFromInsideOut=[];
+  const standaloneFromTimes=lines
+   .filter(line=>line.t>=65&&line.t<=95&&line.x.trim().toLowerCase()==='from')
+   .map(line=>line.t);
+  lines.forEach(line=>{
+   const lyric=line.x.replace(/\s+/g,' ').trim();
+   if(line.t<65||line.t>95||!/^from\s+the\s+inside\s+out$/i.test(lyric))return;
+   if(!standaloneFromTimes.some(t=>Math.abs(line.t-t)<=5))return;
+   if(line.words&&line.words.length){
+    let stage=0;
+    const kept=[];
+    line.words.forEach(word=>{
+     let x=word.x;
+     if(stage===0){
+      const m=x.match(/^\s*from\b\s*/i);
+      if(m){x=x.slice(m[0].length);stage=1;}
+     }
+     if(stage===1){
+      const m=x.match(/^\s*the\b\s*/i);
+      if(m){x=x.slice(m[0].length);stage=2;}
+     }
+     if(x)kept.push({...word,x});
+    });
+    line.words=kept;
+    line.x=kept.map(word=>word.x).join('').replace(/\s+/g,' ').trim();
+   }else{
+    line.x=line.x.replace(/^from\s+the\s+/i,'');
+   }
+  });
+  // Around 03:17 the complete phrase is duplicated. Keep the first cue
+  // and remove only another identical phrase within the same passage.
+  let keptPhraseTime=null;
   lines=lines.filter(line=>{
    const lyric=line.x.replace(/\s+/g,' ').trim().toLowerCase();
-   if(lyric!=='from inside out')return true;
-   if(keptFromInsideOut.some(t=>Math.abs(line.t-t)<5))return false;
-   keptFromInsideOut.push(line.t);
+   if(lyric!=='from inside out'||line.t<185||line.t>210)return true;
+   if(keptPhraseTime!==null&&line.t-keptPhraseTime<8)return false;
+   keptPhraseTime=line.t;
    return true;
   });
  }
