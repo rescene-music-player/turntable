@@ -260,7 +260,7 @@ au.ontimeupdate=()=>{$('cur').textContent=fmt(au.currentTime);if(au.duration&&do
 $('vol').oninput=e=>au.volume=Number(e.target.value)/100;
 $('seek').oninput=e=>{if(au.duration)au.currentTime=Number(e.target.value)/1000*au.duration};
 function syncLyrics(){
- if(!timed)return;let found=-1;const t=au.currentTime+.035;
+ if(!timed)return;let found=-1;const t=au.currentTime+.2;
  for(let i=0;i<lines.length;i++){if(lines[i].t<=t)found=i;else break}
  const nodes=$('lyr').children;
  if(found!==lyricIndex){
