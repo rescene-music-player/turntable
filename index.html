@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.055);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#e7dafa;--accent2:#c7b4e9}
+:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.055);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#34454d;--accent2:#34454d}
 *{box-sizing:border-box}
 html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
 body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#494354 0%,#282530 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
@@ -191,20 +191,14 @@ function showLyrics(source,trackIndex){
   });
  }
  if(trackIndex===1){
-  let fixed=false;
-  for(const line of lines){
-   if(fixed)break;
+  // Correct every parsed occurrence, including word-synced lyric fragments.
+  lines.forEach(line=>{
+   line.x=line.x.replace(/\bou\b/gi,'you');
    if(line.words&&line.words.length){
-    for(const word of line.words){
-     const corrected=word.x.replace(/^(\s*)ou\b/i,'$1you');
-     if(corrected!==word.x){word.x=corrected;fixed=true;break}
-    }
+    line.words.forEach(word=>{word.x=word.x.replace(/\bou\b/gi,'you')});
     line.x=line.words.map(word=>word.x).join('').replace(/\s+/g,' ').trim();
-   }else{
-    const corrected=line.x.replace(/^(\s*)ou\b/i,'$1you');
-    if(corrected!==line.x){line.x=corrected;fixed=true}
    }
-  }
+  });
  }
  lyricIndex=-1;const box=$('lyr');box.innerHTML='';
  lines.forEach(line=>{
@@ -285,8 +279,8 @@ function correctTrackLyrics(trackIndex,source){
   }
  }
  if(trackIndex===1){
-  // Fix the first standalone "ou" wherever it appears, not only at line start.
-  source=source.replace(/\bou\b/i,'you');
+  // Correct every standalone "Ou" occurrence in the With lyrics, regardless of case or position.
+  source=source.replace(/\bou\b/gi,'you');
  }
  return source;
 }
@@ -307,11 +301,11 @@ au.onended=()=>$('next').click();
 au.onplay=()=>$('play').textContent='Ⅱ';
 au.onpause=()=>$('play').textContent='▶';
 au.onloadedmetadata=()=>$('dur').textContent=fmt(au.duration);
-au.ontimeupdate=()=>{$('cur').textContent=fmt(au.currentTime);if(au.duration&&document.activeElement!==$('seek'))$('seek').value=au.currentTime/au.duration*1000;syncLyrics()};
+au.ontimeupdate=()=>{$('cur').textContent=fmt(au.currentTime);if(au.duration&&document.activeElement!==$('seek'))$('seek').value=au.currentTime/au.duration*1000};
 $('vol').oninput=e=>au.volume=Number(e.target.value)/100;
 $('seek').oninput=e=>{if(au.duration)au.currentTime=Number(e.target.value)/1000*au.duration};
 function syncLyrics(){
- if(!timed)return;let found=-1;const t=au.currentTime+.2;
+ if(!timed)return;let found=-1;const t=au.currentTime;
  for(let i=0;i<lines.length;i++){if(lines[i].t<=t)found=i;else break}
  const nodes=$('lyr').children;
  if(found!==lyricIndex){
@@ -330,6 +324,7 @@ function syncLyrics(){
 let previous=performance.now();
 function animate(now){
  const dt=Math.min(.05,(now-previous)/1000);previous=now;
+ syncLyrics();
  const playing=!au.paused&&!au.ended;
  speed+=( (playing?200:0)-speed)*Math.min(1,dt*(playing?1.6:1.1));
  if(speed<.2&&!playing)speed=0;angle=(angle+speed*dt)%360;
