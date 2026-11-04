@@ -190,6 +190,20 @@ function showLyrics(source,trackIndex){
    if(line.words)line.words.forEach(word=>{word.x=word.x.replace(/\bthing\]/gi,'thing')});
   });
  }
+ if(trackIndex===2){
+  // Correct the duplicated lyric: place "From inside out" at the timestamp
+  // where "From the" currently appears, then remove its later duplicate.
+  for(let i=0;i<lines.length-1;i++){
+   const current=lines[i].x.replace(/\\s+/g,' ').trim().toLowerCase();
+   const next=lines[i+1].x.replace(/\\s+/g,' ').trim().toLowerCase();
+   if(current==='from the'&&next==='from inside out'){
+    lines[i].x='From inside out';
+    lines[i].words=[];
+    lines.splice(i+1,1);
+    break;
+   }
+  }
+ }
  if(trackIndex===1){
   // Repair the opening word after parsing, where FLAC word timestamps may split it.
   lines.forEach(line=>{
