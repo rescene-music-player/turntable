@@ -272,12 +272,17 @@ async function readFlacLyrics(path){
 }
 function correctTrackLyrics(trackIndex,source){
  if(trackIndex===0){
-  // Remove the stray closing bracket after "thing" in Finest Thing.
+  // Remove only the stray closing bracket after "thing".
   source=source.replace(/\bthing\]/gi,'thing');
+  // Add the missing intro. The track's first verse begins at about 00:09;
+  // these opening cues are placed across the 0–9 second intro.
+  if(!/Shine or 24-karat rings/i.test(source)){
+   source='[00:00.00]Shine or 24-karat rings\n[00:03.00]Choose what deepens over time, cha-ching\n[00:06.00]Never chase the fleeting things (I\'m the finest thing)\n'+source;
+  }
  }
  if(trackIndex===1){
-  // Correct the first standalone "ou" token in With, including timestamped formats.
-  source=source.replace(/(^|\n)(\s*(?:<\d+:\d+(?:\.\d+)?>|\[\d+:\d+(?:\.\d+)?\])?\s*)ou\b/i,'$1$2you');
+  // Fix the first standalone "ou" wherever it appears, not only at line start.
+  source=source.replace(/\bou\b/i,'you');
  }
  return source;
 }
