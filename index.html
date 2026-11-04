@@ -135,6 +135,7 @@ const fmt=s=>Number.isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).pa
 au.volume=.8;
 function parseLyrics(source){
  const out=[];let hasTime=false;
+ // Remove stray square brackets from lyric text while preserving [mm:ss] LRC timestamps.
  source.split(/\r?\n/).forEach(raw=>{
   const line=raw.replace(/^\s*v\d+\s*:\s*/i,'').trim();
   if(!line)return;
@@ -143,7 +144,7 @@ function parseLyrics(source){
   const words=[];let match;
   while((match=wordRe.exec(line))){
    const t=Number(match[1])*60+Number(match[2]);
-   const x=match[3];
+   const x=match[3].replace(/[\[\]]/g,'');
    if(x)words.push({t,x});
   }
   if(words.length){
@@ -155,7 +156,7 @@ function parseLyrics(source){
   // Standard line-synced LRC
   const re=/\[(\d+):(\d+(?:\.\d+)?)\]/g;let m,times=[];
   while((m=re.exec(line)))times.push(Number(m[1])*60+Number(m[2]));
-  const lyric=line.replace(re,'').trim();
+  const lyric=line.replace(re,'').replace(/[\[\]]/g,'').trim();
   if(times.length){hasTime=true;if(lyric)times.forEach(t=>out.push({t,x:lyric,words:[]}))}
   else if(lyric&&!/^\[[a-z]+:/i.test(lyric))out.push({t:-1,x:lyric,words:[]});
  });
