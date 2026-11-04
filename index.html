@@ -230,12 +230,12 @@ async function readFlacLyrics(path){
 }
 function correctTrackLyrics(trackIndex,source){
  if(trackIndex===0){
-  // Correct a stray closing bracket in the embedded Finest Thing lyric tag.
-  source=source.replace(/\\bthing\\]/gi,'thing');
+  // Remove the stray closing bracket after "thing" in Finest Thing.
+  source=source.replace(/\bthing\]/gi,'thing');
  }
  if(trackIndex===1){
-  // The first word in With's embedded intro is "you", not "ou".
-  source=source.replace(/(^|\\n)(\\s*(?:<\\d+:\\d+(?:\\.\\d+)?>|\\[\\d+:\\d+(?:\\.\\d+)?\\])?\\s*)ou\\b/i,'$1$2you');
+  // Correct the first standalone "ou" token in With, including timestamped formats.
+  source=source.replace(/(^|\n)(\s*(?:<\d+:\d+(?:\.\d+)?>|\[\d+:\d+(?:\.\d+)?\])?\s*)ou\b/i,'$1$2you');
  }
  return source;
 }
