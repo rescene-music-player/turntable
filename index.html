@@ -316,20 +316,29 @@ au.ontimeupdate=()=>{$('cur').textContent=fmt(au.currentTime);if(au.duration&&do
 $('vol').oninput=e=>au.volume=Number(e.target.value)/100;
 $('seek').oninput=e=>{if(au.duration)au.currentTime=Number(e.target.value)/1000*au.duration};
 function syncLyrics(){
- if(!timed)return;let found=-1;const t=au.currentTime;
+ if(!timed)return;
+ const t=au.currentTime,nodes=$('lyr').children;
+ let found=-1;
  for(let i=0;i<lines.length;i++){if(lines[i].t<=t)found=i;else break}
- const nodes=$('lyr').children;
+ // The final lyric has no following timestamp to end its highlight.
+ // Release it shortly after its final word instead of leaving it lit forever.
+ if(found===lines.length-1&&found>=0){
+  const last=lines[found],words=last.words||[];
+  const finalCue=words.length?words[words.length-1].t:last.t;
+  if(t>finalCue+2.5)found=-1;
+ }
  if(found!==lyricIndex){
+  if(lyricIndex>=0&&nodes[lyricIndex]){
+   nodes[lyricIndex].classList.remove('on');
+   nodes[lyricIndex].querySelectorAll('.lyric-word.word-on').forEach(span=>span.classList.remove('word-on'));
+  }
   lyricIndex=found;activeWordIndex=-1;
   [...nodes].forEach((node,i)=>node.classList.toggle('on',i===found));
   if(found>=0)$('lyr').scrollTop=nodes[found].offsetTop-$('lyr').clientHeight/2+nodes[found].clientHeight/2;
  }
- // Highlight the currently sung word when word-level timestamps are available.
  if(found>=0&&lines[found].words&&lines[found].words.length){
   const words=lines[found].words;let active=-1;
   for(let i=0;i<words.length;i++){if(words[i].t<=t)active=i;else break}
-  // Update the DOM only when the active word actually changes; avoid
-  // repeatedly toggling highlight classes on every animation frame.
   if(active!==activeWordIndex){
    activeWordIndex=active;
    const spans=nodes[found].querySelectorAll('.lyric-word');
