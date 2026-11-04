@@ -197,18 +197,18 @@ function showLyrics(source,trackIndex){
     const first=line.words.findIndex(word=>word.x.trim());
     if(first>=0){
      const a=line.words[first],b=line.words[first+1];
-     if(/^o$/i.test(a.x.trim())&&b&&/^u(?:\\b|['’])/i.test(b.x.trim())){
+     if(/^o$/i.test(a.x.trim())&&b&&/^u(?:\b|['’])/i.test(b.x.trim())){
       a.x='You'+b.x.trim().slice(1);
       b.x='';
      }else{
-      a.x=a.x.replace(/^ou(?=\\b|['’])/i,'You');
+      a.x=a.x.replace(/^ou(?=\b|['’])/i,'You');
      }
     }
     line.words=line.words.filter(word=>word.x);
-    line.x=line.words.map(word=>word.x).join('').replace(/\\s+/g,' ').trim();
+    line.x=line.words.map(word=>word.x).join('').replace(/\s+/g,' ').trim();
    }
    // Final guard for line-synced lyrics and the first displayed word.
-   line.x=line.x.replace(/^ou(?=\\b|['’])/i,'You');
+   line.x=line.x.replace(/^ou(?=\b|['’])/i,'You');
   });
  }
  lyricIndex=-1;const box=$('lyr');box.innerHTML='';
