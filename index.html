@@ -14,8 +14,7 @@
 body{-webkit-user-select:none;user-select:none;caret-color:transparent;cursor:default}
 html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
 body{position:relative;isolation:isolate;margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#46535b 0%,#2a343b 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:rgba(8,12,18,.42)}
-body::after{content:"";position:fixed;inset:-2%;z-index:-2;pointer-events:none;background-image:var(--album-art-backdrop);background-position:center;background-size:cover;background-repeat:no-repeat;opacity:.58;filter:blur(1.2px) brightness(.55) saturate(1.12);transform:scale(1.025)}
+body::before{content:"";position:fixed;inset:-22%;z-index:-1;pointer-events:none;filter:blur(48px);background:radial-gradient(ellipse at 18% 25%,rgba(157,190,211,.27) 0%,transparent 24%),radial-gradient(ellipse at 76% 18%,rgba(194,169,214,.24) 0%,transparent 23%),radial-gradient(ellipse at 82% 76%,rgba(105,157,185,.2) 0%,transparent 27%),radial-gradient(ellipse at 24% 82%,rgba(133,157,180,.15) 0%,transparent 26%)}
 button,input{font:inherit}
 .wrap{width:min(100% - 40px,862px);margin:0 auto;padding:22px 0 28px}
 .main-layout{display:grid;grid-template-columns:minmax(0,420px) minmax(0,420px);gap:22px;justify-content:center;align-items:start}
@@ -111,7 +110,6 @@ button{border:0;color:var(--ink);cursor:pointer}
 </div></div>
 <script>
 const $=id=>document.getElementById(id),au=new Audio();
-const albumArt=document.querySelector('.album-cover');if(albumArt)document.body.style.setProperty('--album-art-backdrop',`url("${albumArt.src}")`);
 document.addEventListener('contextmenu',event=>event.preventDefault());
 const tracks=[
  {n:'Finest Thing',a:'tracks/01.flac'},
