@@ -82,6 +82,30 @@ button{border:0;color:var(--ink);cursor:pointer}
  .pl-row.on{-webkit-backdrop-filter:url(#liquid-refraction) blur(.7px) saturate(1.5);backdrop-filter:url(#liquid-refraction) blur(.7px) saturate(1.5)}
  #play{-webkit-backdrop-filter:url(#liquid-refraction) blur(.5px) saturate(1.6);backdrop-filter:url(#liquid-refraction) blur(.5px) saturate(1.6)}
 }
+
+/* Stabilize the auto-scrolling lyrics viewport.
+   SVG backdrop refraction on a scrolling text layer can leave compositing smears.
+   Keep Liquid Glass on the other panels, but use a stable translucent material here. */
+.panel.lyrics{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+  background:rgba(205,221,232,.055);
+  overflow-anchor:none;
+  overscroll-behavior:contain;
+}
+.panel.lyrics::after{display:none}
+.lyrics p{
+  transition:color .18s ease,opacity .18s ease;
+}
+.lyrics p.on{
+  font-size:14px;
+  font-weight:600;
+  transform:none;
+  text-shadow:none;
+}
+.lyric-word.word-on{
+  text-shadow:0 0 1px rgba(255,255,255,.9),0 0 5px rgba(87,170,255,.52);
+}
 </style>
 </head>
 <body>
