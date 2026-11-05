@@ -4,3 +4,5 @@
 - 배포: GitHub 레포 → Settings → Pages → Branch: main / (root)
 
 주의: 50MB 넘는 파일이 있어 GitHub 웹 업로드(파일당 25MB 제한)는 안 돼요. git 명령어나 GitHub Desktop으로 push 하세요.
+
+<!-- GitHub Pages redeploy trigger: 2026-11-06 -->
