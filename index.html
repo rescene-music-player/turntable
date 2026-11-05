@@ -9,16 +9,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.10);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#e7dafa;--accent2:#c7b4e9}
+:root{color-scheme:dark;--bg:#151b20;--panel:rgba(224,231,235,.075);--line:rgba(215,225,231,.13);--ink:#f3eff3;--muted:#aab2b8;--accent:#d9cce1;--accent2:#b8c6ce}
 *{box-sizing:border-box}
 body{-webkit-user-select:none;user-select:none;caret-color:transparent;cursor:default}
 html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
-body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#494354 0%,#282530 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
+body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#46535b 0%,#2a343b 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
 button,input{font:inherit}
 .wrap{width:min(100% - 40px,1180px);margin:0 auto;padding:22px 0 28px}
 .main-layout{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);gap:26px;align-items:start}
 .stage-left{min-width:0}
-.stage-right{min-width:0;display:flex;flex-direction:column;gap:12px}
+.stage-right{width:100%;max-width:420px;min-width:0;margin-inline:auto;display:flex;flex-direction:column;gap:12px}
 .stage-left .player{margin-top:0}
 .album-cover{display:block;width:min(100%,420px);aspect-ratio:1/1;object-fit:cover;border-radius:26px;margin:0 auto 17px;box-shadow:0 22px 44px rgba(0,0,0,.34)}
 .stage-right .section-head{margin:2px 2px -4px}
@@ -59,7 +59,7 @@ button{border:0;color:var(--ink);cursor:pointer}
 .section-head span{font-family:"Cormorant Garamond",Georgia,serif;font-size:14px;color:var(--muted);font-style:italic}
 .lyrics{height:190px;overflow-y:auto;text-align:center;padding:47px 14px;scrollbar-width:none;mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 22%,#000 78%,transparent)}
 .lyrics::-webkit-scrollbar{display:none}
-.lyrics p{margin:0;padding:6px 0;font-size:14px;line-height:1.65;color:var(--muted);opacity:.58;transition:color .25s,opacity .25s,transform .25s}
+.lyrics p{margin:0;padding:6px 2px;font-size:14px;line-height:1.65;color:var(--muted);opacity:.58;overflow-wrap:break-word;word-break:normal;transition:color .25s,opacity .25s,transform .25s}
 .lyric-word{display:inline;transition:none}
 .lyric-word.word-on{color:#fff;-webkit-text-fill-color:#fff;background:none;text-shadow:0 0 2px rgba(255,255,255,.95),0 0 5px rgba(87,170,255,.95),0 0 11px rgba(55,145,255,.88),0 0 21px rgba(40,120,255,.66),0 0 34px rgba(40,120,255,.42)}
 .lyrics p.on{color:#fff;opacity:1;font-size:17px;font-weight:600;transform:scale(1.02);text-shadow:0 0 18px rgba(231,218,250,.38)}
