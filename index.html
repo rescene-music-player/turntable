@@ -209,6 +209,41 @@ function showLyrics(source,trackIndex){
    keptPhraseTime=line.t;
    return true;
   });
+  // Join the separately timed "From" and "inside out" cues into one lyric row.
+  // Keep each word timestamp so karaoke highlighting remains synchronized.
+  const mergedInsideLines=new Set();
+  lines.forEach((fromLine,i)=>{
+   const fromText=fromLine.x.replace(/\s+/g,' ').trim().toLowerCase();
+   const inPassage=(fromLine.t>=65&&fromLine.t<=95)||(fromLine.t>=185&&fromLine.t<=210);
+   if(!inPassage||fromText!=='from')return;
+   const insideIndex=lines.findIndex((candidate,j)=>{
+    if(j<=i||mergedInsideLines.has(j))return false;
+    const candidateText=candidate.x.replace(/\s+/g,' ').trim().toLowerCase();
+    return candidateText==='inside out'&&Math.abs(candidate.t-fromLine.t)<=5;
+   });
+   if(insideIndex<0)return;
+   const insideLine=lines[insideIndex];
+   const fromWords=fromLine.words&&fromLine.words.length
+    ?fromLine.words.map(word=>({...word}))
+    :[{t:fromLine.t,x:'From'}];
+   const insideWords=insideLine.words&&insideLine.words.length
+    ?insideLine.words.map(word=>({...word}))
+    :[{t:insideLine.t,x:insideLine.x.trim()}];
+   if(insideWords.length&&!/^\s/.test(insideWords[0].x))insideWords[0].x=' '+insideWords[0].x;
+   fromLine.x='From '+insideLine.x.trim();
+   fromLine.words=[...fromWords,...insideWords];
+   mergedInsideLines.add(insideIndex);
+  });
+  lines=lines.filter((line,i)=>!mergedInsideLines.has(i));
+  // If the 03:17 phrase is repeated in the source cues, keep only its first row.
+  keptPhraseTime=null;
+  lines=lines.filter(line=>{
+   const lyric=line.x.replace(/\s+/g,' ').trim().toLowerCase();
+   if(lyric!=='from inside out'||line.t<185||line.t>210)return true;
+   if(keptPhraseTime!==null&&line.t-keptPhraseTime<8)return false;
+   keptPhraseTime=line.t;
+   return true;
+  });
  }
  if(trackIndex===1){
   // Repair the opening word after parsing, where FLAC word timestamps may split it.
