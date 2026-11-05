@@ -11,6 +11,7 @@
 <style>
 :root{color-scheme:dark;--bg:#17151d;--panel:rgba(255,255,255,.10);--line:rgba(255,255,255,.11);--ink:#f5f1fa;--muted:#aaa3b5;--accent:#e7dafa;--accent2:#c7b4e9}
 *{box-sizing:border-box}
+body{-webkit-user-select:none;user-select:none;caret-color:transparent;cursor:default}
 html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
 body{margin:0;min-height:100vh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);background:radial-gradient(ellipse 90% 45% at 50% 0%,#494354 0%,#282530 42%,var(--bg) 100%);color:var(--ink);font-family:"Noto Sans KR",system-ui,sans-serif}
 button,input{font:inherit}
@@ -47,7 +48,7 @@ button,input{font:inherit}
 .eyebrow{font-size:10px;letter-spacing:.2em;color:var(--accent2);text-transform:uppercase;margin-bottom:6px}
 .title{font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sub{font-size:11px;color:var(--muted);margin-top:4px;letter-spacing:.08em}
-.seek{display:flex;align-items:center;gap:10px;margin-top:18px;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.seek{display:flex;align-items:center;gap:10px;margin-top:8px;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
 input[type=range]{appearance:none;-webkit-appearance:none;height:3px;border-radius:4px;background:rgba(255,255,255,.18);outline:none;min-width:0}
 #seek{flex:1}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(231,218,250,.12)}
@@ -188,13 +189,14 @@ button{border:0;color:var(--ink);cursor:pointer}
   </div>
 </section>
 </div><div class="stage-right">
-<div class="section-head"><strong>TRACKLIST</strong><span>01 — 05 · SELECT A TRACK</span></div>
+<div class="section-head"><strong>TRACKLIST</strong></div>
 <section class="panel playlist" id="pl" aria-label="순서대로 정렬된 재생목록"></section>
-<div class="section-head"><strong>LYRICS</strong><span>Sing along</span></div>
+<div class="section-head"><strong>LYRICS</strong></div>
 <section class="panel lyrics" id="lyr"><p>재생목록에서 곡을 선택하면<br>싱크 가사가 표시됩니다</p></section>
 </div></div>
 <script>
 const $=id=>document.getElementById(id),au=new Audio();
+document.addEventListener('contextmenu',event=>event.preventDefault());
 const tracks=[
  {n:'Finest Thing',a:'tracks/01.flac'},
  {n:'With',a:'tracks/02.flac'},
@@ -346,7 +348,7 @@ function render(){
   const row=document.createElement('button');row.type='button';row.className='pl-row'+(i===current?' on':'');row.setAttribute('aria-pressed',String(i===current));
   const num=document.createElement('span');num.className='pl-num';num.textContent=String(i+1).padStart(2,'0');
   const name=document.createElement('span');name.className='pl-name';name.textContent=track.n;
-  const tag=document.createElement('span');tag.className='pl-tag';tag.textContent=i===current?'PLAYING':'FLAC';
+  const tag=document.createElement('span');tag.className='pl-tag';tag.textContent=i===current?'PLAYING':'';
   row.append(num,name,tag);row.onclick=()=>playTrack(i);list.appendChild(row);
  });
 }
