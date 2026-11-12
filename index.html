@@ -1473,7 +1473,8 @@ html,body{
 }
 
 
-/* Real photographed 12-inch LP: Evan Amos, released to the public domain. */
+/* Real photographed LP. A separate moving sheen keeps the reflection alive
+   while the record surface and PULSE label rotate together. */
 .vinyl-record{
   background:none!important;
 }
@@ -1486,55 +1487,84 @@ html,body{
   height:100%;
   object-fit:cover;
   transform:scale(1.18);
+  filter:brightness(.82) contrast(1.12);
+  -webkit-filter:brightness(.82) contrast(1.12);
   mix-blend-mode:multiply;
   pointer-events:none;
   user-select:none;
   -webkit-user-drag:none;
 }
-.vinyl-record::before{z-index:1}
+.vinyl-record::before{
+  z-index:1;
+  background:
+    conic-gradient(from 12deg,
+      transparent 0deg,
+      rgba(255,255,255,.015) 34deg,
+      rgba(255,255,255,.16) 48deg,
+      rgba(255,255,255,.34) 57deg,
+      rgba(255,255,255,.10) 68deg,
+      transparent 91deg,
+      transparent 360deg),
+    radial-gradient(ellipse 48% 17% at 30% 14%,rgba(255,255,255,.13),transparent 78%);
+  opacity:.78;
+  transform-origin:50% 50%;
+  animation:vinyl-light-drift 4.8s linear infinite;
+  animation-play-state:paused;
+  mix-blend-mode:screen;
+}
+.vinyl-record.is-playing::before{animation-play-state:running}
+@keyframes vinyl-light-drift{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(-360deg)}
+}
 .vinyl-record::after{z-index:2}
 .vinyl-label{z-index:3}
 
-/* Let every lyric wrap to its full height instead of clipping it into a
-   fixed 26/32px row. The active cue remains centered by syncLyrics(). */
+/* Natural-height lyric rows: no fixed row height, no one-line clipping.
+   The active cue is centered by syncLyrics(), and long lines can scroll. */
 .stage-right .lyrics{
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  justify-content:flex-start!important;
+  display:block!important;
+  position:relative!important;
+  box-sizing:border-box!important;
+  width:100%!important;
   height:224px!important;
   min-height:224px!important;
   max-height:224px!important;
   flex:0 0 224px!important;
-  padding:0!important;
+  padding:0 12px!important;
+  margin:0!important;
   overflow-x:hidden!important;
   overflow-y:auto!important;
   scroll-behavior:auto!important;
   overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch;
 }
 .stage-right .lyrics .lyric-spacer{
   display:block!important;
   width:100%!important;
-  height:96px!important;
-  min-height:96px!important;
-  max-height:96px!important;
-  flex:0 0 96px!important;
+  height:112px!important;
+  min-height:112px!important;
+  max-height:112px!important;
   margin:0!important;
   padding:0!important;
+  border:0!important;
+  flex:none!important;
+  pointer-events:none!important;
 }
 .stage-right .lyrics p,
 .stage-right .lyrics p.on{
   display:block!important;
+  position:relative!important;
   width:100%!important;
   height:auto!important;
-  min-height:32px!important;
+  min-height:0!important;
   max-height:none!important;
-  flex:0 0 auto!important;
+  flex:none!important;
   margin:0!important;
-  padding:5px 4px!important;
+  padding:6px 4px!important;
   box-sizing:border-box!important;
   line-height:1.45!important;
-  font-size:15px!important;
+  font-size:14px!important;
   text-align:center!important;
   white-space:normal!important;
   overflow:visible!important;
@@ -1542,6 +1572,11 @@ html,body{
   word-break:normal!important;
   text-overflow:unset!important;
   transform:none!important;
+}
+.stage-right .lyrics .lyric-word{
+  display:inline!important;
+  white-space:normal!important;
+  overflow:visible!important;
 }
 @media(max-height:650px){
   .stage-right .lyrics{
@@ -1551,11 +1586,15 @@ html,body{
     flex-basis:182px!important;
   }
   .stage-right .lyrics .lyric-spacer{
-    height:78px!important;
-    min-height:78px!important;
-    max-height:78px!important;
-    flex-basis:78px!important;
+    height:91px!important;
+    min-height:91px!important;
+    max-height:91px!important;
   }
+}
+@media(prefers-reduced-motion:reduce){
+  /* The record still follows playback; only unrelated page transitions reduce. */
+  .vinyl-record.is-playing{animation-play-state:running!important}
+  .vinyl-record.is-playing::before{animation-play-state:running!important}
 }
 
 </style>
@@ -1937,13 +1976,10 @@ function parseLyrics(source){
 function fitLyricText(){
  const box=$('lyr');
  if(!box)return;
+ // Do not force each lyric into a one-line fixed-height row. Clear old inline
+ // sizing and let the browser wrap every complete line to its natural height.
  box.querySelectorAll('p').forEach(p=>{
-  let size=15;
-  p.style.setProperty('font-size',size+'px','important');
-  while(p.scrollWidth>p.clientWidth+1&&size>9){
-   size=Math.max(9,size-.5);
-   p.style.setProperty('font-size',size+'px','important');
-  }
+  ['font-size','height','min-height','max-height','white-space','overflow','text-overflow','line-height'].forEach(name=>p.style.removeProperty(name));
  });
 }
 window.addEventListener('resize',()=>requestAnimationFrame(fitLyricText));
@@ -2225,7 +2261,7 @@ function syncLyrics(){
   [...nodes].forEach((node,i)=>node.classList.toggle('on',i===found));
   if(found>=0){
    const box=$('lyr'),boxRect=box.getBoundingClientRect(),lineRect=nodes[found].getBoundingClientRect();
-   lyricScrollTarget=Math.max(0,box.scrollTop+lineRect.top-boxRect.top-box.clientHeight/2+lineRect.height/2);
+   lyricScrollTarget=Math.max(0,Math.min(box.scrollHeight-box.clientHeight,box.scrollTop+lineRect.top-boxRect.top-box.clientHeight/2+lineRect.height/2));
   }
  }
  if(found>=0&&lines[found].words&&lines[found].words.length){
