@@ -1818,6 +1818,17 @@ html,body{
   .vinyl-record.is-playing::before{animation-play-state:running!important}
 }
 
+
+/* Clip only the lower edge of the three lyric rows above the active cue. */
+.stage-right .lyrics p.above-current{
+  clip-path:inset(0 0 3px 0)!important;
+}
+/* The replacement LP surface is matte and has no baked-in light reflection. */
+.vinyl-photo{
+  filter:brightness(1.18) contrast(1.10)!important;
+  -webkit-filter:brightness(1.18) contrast(1.10)!important;
+}
+
 </style>
 </head>
 <body>
@@ -2483,7 +2494,10 @@ function syncLyrics(){
    nodes[lyricIndex].querySelectorAll('.lyric-word.word-on').forEach(span=>span.classList.remove('word-on'));
   }
   lyricIndex=found;activeWordIndex=-1;
-  [...nodes].forEach((node,i)=>node.classList.toggle('on',i===found));
+  [...nodes].forEach((node,i)=>{
+   node.classList.toggle('on',i===found);
+   node.classList.toggle('above-current',found>=0&&i>=found-3&&i<found);
+  });
   if(found>=0){
    // The lyric window has a 3-row top spacer and 12px safe padding.
    // Snap by an exact row count so the first and last visible cues are never
