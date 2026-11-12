@@ -945,7 +945,7 @@ body::before,body::after{content:none!important}
   justify-content:center!important;
 }
 .vinyl-stage{
-  width:min(190px,20svh,48vw)!important;
+  width:min(209px,22svh,52.8vw)!important;
   min-width:0!important;
   aspect-ratio:1!important;
   margin:0 auto 22px!important;
@@ -979,13 +979,13 @@ body::before,body::after{content:none!important}
 }
 @media(max-height:760px){
   .main-layout{gap:6px!important}
-  .vinyl-stage{width:min(160px,18svh,44vw)!important;margin-bottom:15px!important}
+  .vinyl-stage{width:min(176px,19.8svh,48.4vw)!important;margin-bottom:15px!important}
   .stage-left .player,.player{padding-top:0;padding-bottom:2px}
 }
 @media(max-height:650px){
   .wrap{padding:5px!important}
   .main-layout{gap:4px!important;max-height:calc(100svh - 10px)!important}
-  .vinyl-stage{width:min(125px,17svh,40vw)!important;margin-bottom:9px!important}
+  .vinyl-stage{width:min(137.5px,18.7svh,44vw)!important;margin-bottom:9px!important}
 }
 
 /* Liquid Glass proper: a live-aligned copy of the space scene is optically displaced
@@ -1375,6 +1375,17 @@ body::before,body::after{content:none!important}
   background:transparent!important;
 }
 
+
+
+/* The spindle opening is a real cut-through hole, not a painted center dot. */
+.vinyl-record{
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,transparent 0 4px,#000 4.7px);
+  mask-image:radial-gradient(circle at 50% 50%,transparent 0 4px,#000 4.7px);
+  -webkit-mask-mode:alpha;
+  mask-mode:alpha;
+}
+.vinyl-spindle{display:none!important}
+
 </style>
 </head>
 <body>
@@ -1655,7 +1666,7 @@ const trackBackdropPairs=[
   'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/ec1dfe31-5ef0-4163-8ab7-0cd313b7d5ec/6774d699-0360-4511-ad51-1248b691c4cc/ori.jpg'
  ],
  [
-  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/c6a5b88c-3efe-479e-9eaf-c671562c125d/16d1fe70-4d79-4069-9e93-865e6cd2e1f/ori.jpg',
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/c6a5b88c-3efe-479e-9eaf-c671562c125d/16d1fe70-4d79-4069-9e93-c865e6cd2e1f/ori.jpg',
   'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/2d1df577-4952-4ea9-bc66-00012f757152/6a9436d8-09f8-4c29-b765-4a0a226a8019/ori.jpg'
  ],
  [
