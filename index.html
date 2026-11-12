@@ -1243,12 +1243,68 @@ body::before,body::after{content:none!important}
   }
 }
 
+
+/* Per-track paired side images, softly revealed behind the player. */
+.track-backdrops{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.track-backdrops img{
+  position:absolute;
+  top:50%;
+  width:clamp(120px,24vw,420px);
+  height:min(74svh,740px);
+  max-height:calc(100svh - 32px);
+  object-fit:cover;
+  object-position:center;
+  border-radius:22px;
+  opacity:0;
+  transform:translate3d(0,-50%,0) scale(.985);
+  filter:blur(1.2px) brightness(.68) saturate(.92);
+  box-shadow:0 22px 60px rgba(0,0,0,.28);
+  transition:opacity 1.35s cubic-bezier(.2,.65,.25,1),transform 1.35s cubic-bezier(.2,.65,.25,1);
+  will-change:opacity,transform;
+}
+#trackBackdropLeft{left:clamp(0px,calc((100vw - 1440px)/2 + 24px),160px)}
+#trackBackdropRight{right:clamp(0px,calc((100vw - 1440px)/2 + 24px),160px)}
+.track-backdrops img.is-visible{
+  opacity:1;
+  transform:translate3d(0,-50%,0) scale(1);
+}
+.wrap{position:relative;z-index:1}
+
+/* Requested vertical breathing room: 10px above and below both panels. */
+.stage-left .player,
+.stage-right .playlist{
+  padding-top:10px!important;
+  padding-bottom:10px!important;
+}
+@media(max-width:820px){
+  .track-backdrops img{
+    width:clamp(100px,25vw,220px);
+    height:min(66svh,620px);
+    filter:blur(1.4px) brightness(.56) saturate(.9);
+  }
+  #trackBackdropLeft{left:0}
+  #trackBackdropRight{right:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .track-backdrops img{transition:none!important}
+}
+
 </style>
 </head>
 <body>
 <svg class="glass-filters" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
   <defs id="liquidGlassDefs"></defs>
 </svg>
+<div class="track-backdrops" aria-hidden="true">
+  <img id="trackBackdropLeft" alt="">
+  <img id="trackBackdropRight" alt="">
+</div>
 <div class="wrap">
 <div class="main-layout"><div class="stage-left">
 <div class="vinyl-stage">
@@ -1513,6 +1569,53 @@ const tracks=[
  {n:'MEME',a:'tracks/04.flac'},
  {n:'Dragon',a:'tracks/05.flac'}
 ];
+const trackBackdropPairs=[
+ [
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/5364e8db-a8fa-4063-999f-a11c7a19b297/3b69d052-3d6f-4f9d-8700-5b0c7daeeb23/ori.jpg',
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/ec1dfe31-5ef0-4163-8ab7-0cd313b7d5ec/6774d699-0360-4511-ad51-1248b691c4cc/ori.jpg'
+ ],
+ [
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/c6a5b88c-3efe-479e-9eaf-c671562c125d/16d1fe70-4d79-4069-9e93-865e6cd2e1f/ori.jpg',
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/2d1df577-4952-4ea9-bc66-00012f757152/6a9436d8-09f8-4c29-b765-4a0a226a8019/ori.jpg'
+ ],
+ [
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/485d50b0-e783-4970-8106-eb92a54a4f28/b17c84e6-3199-4ff8-a874-b9b360e1d7a3/ori.jpg',
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/b22d54a2-69ba-4b86-b7f5-3665a3cbfada/72ca5b01-9a4f-4e27-9c6c-d5fe6bd415ce/ori.jpg'
+ ],
+ [
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/e695da4c-60c3-4045-bedb-bee82467f963/2086e77c-3c65-4f79-8cbb-cd40d3c99bbc/ori.jpg',
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/67d428db-63c4-47f8-8270-0dda66b733a7/bb522dbd-8dce-4ae0-a93c-b14941422135/ori.jpg'
+ ],
+ [
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/638e7949-6aa3-44e3-b70e-41335790ddcf/20d1ab49-ad89-481e-a0af-f604417e9b7e/ori.jpg',
+  'https://image.static.bstage.in/cdn-cgi/image/metadata=none,dpr=1,width=640,format=auto/rescene-official/bf421612-3ca1-497e-be22-e5c4a9a6fe39/48d1d168-cdf3-4738-9eeb-40e3b55f7574/ori.jpg'
+ ]
+];
+let trackBackdropTimer=0,trackBackdropToken=0;
+function setTrackBackdrop(index){
+ const left=$('trackBackdropLeft'),right=$('trackBackdropRight');
+ if(!left||!right)return;
+ const pair=trackBackdropPairs[index];
+ const token=++trackBackdropToken;
+ window.clearTimeout(trackBackdropTimer);
+ left.classList.remove('is-visible');
+ right.classList.remove('is-visible');
+ left.onload=null;right.onload=null;
+ if(!pair)return;
+ trackBackdropTimer=window.setTimeout(()=>{
+  if(token!==trackBackdropToken)return;
+  const reveal=image=>{
+   if(token!==trackBackdropToken)return;
+   requestAnimationFrame(()=>{if(token===trackBackdropToken)image.classList.add('is-visible')});
+  };
+  left.onload=()=>reveal(left);
+  right.onload=()=>reveal(right);
+  left.src=pair[0];
+  right.src=pair[1];
+  if(left.complete&&left.naturalWidth)reveal(left);
+  if(right.complete&&right.naturalWidth)reveal(right);
+ },420);
+}
 let current=-1,lines=[],lyricIndex=-1,activeWordIndex=-1,timed=false,lyricScrollTarget=0;
 let shuffleEnabled=false,repeatEnabled=false;
 const fmt=s=>Number.isFinite(s)?Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'):'0:00';
@@ -1767,7 +1870,7 @@ function correctTrackLyrics(trackIndex,source){
 }
 function playTrack(i){
  if(i<0||i>=tracks.length)return;
- current=i;const track=tracks[i];au.volume=1;au.src=track.a;
+ current=i;const track=tracks[i];setTrackBackdrop(i);au.volume=1;au.src=track.a;
  $('ttl').textContent=track.n;$('cur').textContent='0:00';$('seek').value=0;
  $('lyr').innerHTML='<p>내장 가사를 읽는 중입니다</p>';
  readFlacLyrics(track.a).then(text=>{if(current===i){if(text)showLyrics(correctTrackLyrics(i,text),i);else $('lyr').innerHTML='<p>이 FLAC 파일에 읽을 수 있는 가사 태그가 없습니다</p>'}});
