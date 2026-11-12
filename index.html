@@ -1172,16 +1172,82 @@ body::before,body::after{content:none!important}
   .vinyl-record{animation-play-state:paused!important}
 }
 
+
+/* Liquid Glass material uses article-generated optical maps. No cloned background or painted gradients. */
+.player,.stage-right .playlist{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  background:rgba(179,205,238,.075)!important;
+  border-radius:24px!important;
+  border:1px solid rgba(232,243,255,.22)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 1px 0 0 rgba(255,255,255,.10),
+    inset -1px 0 0 rgba(255,255,255,.08),
+    0 14px 34px rgba(0,0,0,.24)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(1.55)!important;
+  backdrop-filter:blur(12px) saturate(1.55)!important;
+}
+.stage-right .playlist{
+  border:0!important;
+  outline:0!important;
+  border-radius:21px!important;
+  background:rgba(179,205,238,.065)!important;
+}
+.player::before,.player::after,
+.stage-right .playlist::before,.stage-right .playlist::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+  filter:none!important;
+  box-shadow:none!important;
+}
+.player>*,.stage-right .playlist>*{position:relative;z-index:2}
+.transport button{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  border:1px solid rgba(232,243,255,.30)!important;
+  border-radius:50%!important;
+  color:#f4f7ff!important;
+  background:rgba(194,216,244,.105)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.48),
+    inset 1px 0 0 rgba(255,255,255,.13),
+    inset -1px 0 0 rgba(255,255,255,.09),
+    0 5px 14px rgba(0,0,0,.22)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(1.55)!important;
+  backdrop-filter:blur(10px) saturate(1.55)!important;
+}
+.transport button::before,.transport button::after{
+  content:none!important;
+  display:none!important;
+  background:none!important;
+  filter:none!important;
+  box-shadow:none!important;
+}
+.transport button#play{
+  background:rgba(209,228,251,.16)!important;
+  border-color:rgba(245,250,255,.46)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    inset 1px 0 0 rgba(255,255,255,.17),
+    inset -1px 0 0 rgba(255,255,255,.12),
+    0 8px 20px rgba(0,0,0,.26)!important;
+}
+@media(prefers-reduced-transparency:reduce){
+  .player,.stage-right .playlist,.transport button{
+    -webkit-backdrop-filter:blur(12px)!important;
+    backdrop-filter:blur(12px)!important;
+  }
+}
+
 </style>
 </head>
 <body>
 <svg class="glass-filters" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
-  <filter id="liquid-refraction" x="-18%" y="-18%" width="136%" height="136%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency=".011 .017" numOctaves="2" seed="23" result="liquid-noise"/>
-    <feGaussianBlur in="liquid-noise" stdDeviation="1.4" result="soft-noise"/>
-    <feDisplacementMap in="SourceGraphic" in2="soft-noise" scale="28" xChannelSelector="R" yChannelSelector="G" result="bent-scene"/>
-    <feGaussianBlur in="bent-scene" stdDeviation=".25"/>
-  </filter>
+  <defs id="liquidGlassDefs"></defs>
 </svg>
 <div class="wrap">
 <div class="main-layout"><div class="stage-left">
@@ -1216,6 +1282,234 @@ body::before,body::after{content:none!important}
 </div></div>
 <script>
 const $=id=>document.getElementById(id),au=new Audio();
+
+/* Kube-style Liquid Glass: physically-derived squircle displacement + specular maps. */
+const LIQUID_GLASS_NS='http://www.w3.org/2000/svg';
+function liquidConvexSquircle(x){
+  return Math.pow(Math.max(0,1-Math.pow(1-x,4)),0.25);
+}
+function liquidDisplacementProfile(glassThickness,bezelWidth,refractiveIndex,samples=128){
+  const eta=1/refractiveIndex;
+  const refract=(normalX,normalY)=>{
+    const dot=normalY;
+    const k=1-eta*eta*(1-dot*dot);
+    if(k<0)return null;
+    const root=Math.sqrt(k);
+    return [-(eta*dot+root)*normalX,eta-(eta*dot+root)*normalY];
+  };
+  return Array.from({length:samples},(_,i)=>{
+    const x=i/samples;
+    const y=liquidConvexSquircle(x);
+    const dx=x<1?0.0001:-0.0001;
+    const nextX=Math.max(0,Math.min(1,x+dx));
+    const derivative=(liquidConvexSquircle(nextX)-y)/(nextX-x);
+    const magnitude=Math.sqrt(derivative*derivative+1);
+    const normalX=-derivative/magnitude;
+    const normalY=-1/magnitude;
+    const ray=refract(normalX,normalY);
+    if(!ray||Math.abs(ray[1])<1e-7)return 0;
+    const remainingHeight=y*bezelWidth+glassThickness;
+    const displacement=ray[0]*(remainingHeight/ray[1]);
+    return Number.isFinite(displacement)?displacement:0;
+  });
+}
+function liquidImageDataToUrl(imageData){
+  const canvas=document.createElement('canvas');
+  canvas.width=imageData.width;
+  canvas.height=imageData.height;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw new Error('Liquid Glass canvas context unavailable');
+  ctx.putImageData(imageData,0,0);
+  return canvas.toDataURL('image/png');
+}
+function liquidCreateDisplacementImage(width,height,radius,bezelWidth,profile,dpr=2){
+  const bufferWidth=Math.max(1,Math.round(width*dpr));
+  const bufferHeight=Math.max(1,Math.round(height*dpr));
+  const canvas=document.createElement('canvas');
+  canvas.width=bufferWidth;canvas.height=bufferHeight;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw new Error('Liquid Glass displacement canvas unavailable');
+  const imageData=ctx.createImageData(bufferWidth,bufferHeight);
+  const data=imageData.data;
+  for(let i=0;i<data.length;i+=4){data[i]=128;data[i+1]=128;data[i+2]=0;data[i+3]=255;}
+
+  const r=radius*dpr,b=bezelWidth*dpr;
+  const r2=r*r,rPlus2=(r+1)*(r+1),rMinus2=(r-b)*(r-b);
+  const objectWidth=width*dpr,objectHeight=height*dpr;
+  const horizontalFlat=objectWidth-r*2,verticalFlat=objectHeight-r*2;
+  const offsetX=(bufferWidth-objectWidth)/2,offsetY=(bufferHeight-objectHeight)/2;
+  const maxEncodingDisplacement=100;
+
+  for(let y1=0;y1<objectHeight;y1++){
+    for(let x1=0;x1<objectWidth;x1++){
+      const x=x1<r?x1-r:x1>=objectWidth-r?x1-r-horizontalFlat:0;
+      const y=y1<r?y1-r:y1>=objectHeight-r?y1-r-verticalFlat:0;
+      const distance2=x*x+y*y;
+      if(distance2>rPlus2||distance2<rMinus2)continue;
+      const distance=Math.sqrt(distance2);
+      const opacity=distance2<r2?1:Math.max(0,1-(distance-r)/(Math.sqrt(rPlus2)-r));
+      const distanceFromSide=r-distance;
+      const index=Math.floor(distanceFromSide/b*profile.length);
+      const displacement=profile[index]??0;
+      const cos=distance?x/distance:0;
+      const sin=distance?y/distance:0;
+      const dX=(-cos*displacement)/maxEncodingDisplacement;
+      const dY=(-sin*displacement)/maxEncodingDisplacement;
+      const pixelX=Math.floor(offsetX+x1),pixelY=Math.floor(offsetY+y1);
+      const idx=(pixelY*bufferWidth+pixelX)*4;
+      data[idx]=128+dX*127*opacity;
+      data[idx+1]=128+dY*127*opacity;
+      data[idx+2]=0;
+      data[idx+3]=255;
+    }
+  }
+  ctx.putImageData(imageData,0,0);
+  return liquidImageDataToUrl(imageData);
+}
+function liquidCreateSpecularImage(width,height,radius,bezelWidth,dpr=2,specularAngle=Math.PI/3){
+  const bufferWidth=Math.max(1,Math.round(width*dpr));
+  const bufferHeight=Math.max(1,Math.round(height*dpr));
+  const canvas=document.createElement('canvas');
+  canvas.width=bufferWidth;canvas.height=bufferHeight;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw new Error('Liquid Glass specular canvas unavailable');
+  const imageData=ctx.createImageData(bufferWidth,bufferHeight);
+  const data=imageData.data;
+  const r=radius*dpr,b=bezelWidth*dpr;
+  const r2=r*r,rPlus2=(r+dpr)*(r+dpr),rMinus2=(r-b)*(r-b);
+  const horizontalFlat=bufferWidth-r*2,verticalFlat=bufferHeight-r*2;
+  const specularX=Math.cos(specularAngle),specularY=Math.sin(specularAngle);
+
+  for(let y1=0;y1<bufferHeight;y1++){
+    for(let x1=0;x1<bufferWidth;x1++){
+      const x=x1<r?x1-r:x1>=bufferWidth-r?x1-r-horizontalFlat:0;
+      const y=y1<r?y1-r:y1>=bufferHeight-r?y1-r-verticalFlat:0;
+      const distance2=x*x+y*y;
+      if(distance2>rPlus2||distance2<rMinus2)continue;
+      const distance=Math.sqrt(distance2);
+      if(!distance)continue;
+      const distanceFromSide=r-distance;
+      const opacity=distance2<r2?1:Math.max(0,1-(distance-r)/(Math.sqrt(rPlus2)-r));
+      const cos=x/distance,sin=-y/distance;
+      const dot=Math.abs(cos*specularX+sin*specularY);
+      const curvature=Math.sqrt(Math.max(0,1-Math.pow(1-distanceFromSide/dpr,2)));
+      const coefficient=dot*curvature;
+      const color=255*coefficient;
+      const finalOpacity=color*coefficient*opacity;
+      const idx=(y1*bufferWidth+x1)*4;
+      data[idx]=color;data[idx+1]=color;data[idx+2]=color;data[idx+3]=finalOpacity;
+    }
+  }
+  ctx.putImageData(imageData,0,0);
+  return liquidImageDataToUrl(imageData);
+}
+function liquidSvgElement(tag,attributes){
+  const node=document.createElementNS(LIQUID_GLASS_NS,tag);
+  Object.entries(attributes).forEach(([name,value])=>node.setAttribute(name,String(value)));
+  return node;
+}
+function liquidAppendImage(filter,href,width,height,result){
+  filter.appendChild(liquidSvgElement('feImage',{
+    href,x:0,y:0,width,height,preserveAspectRatio:'none',result
+  }));
+}
+function liquidBuildFilter(id,width,height,radius,bezelWidth,glassThickness=80,refractiveIndex=1.5){
+  const defs=$('liquidGlassDefs');
+  if(!defs)return;
+  const r=Math.max(2,Math.min(radius,width/2,height/2));
+  const bezel=Math.max(2,Math.min(bezelWidth,r-1));
+  const profile=liquidDisplacementProfile(glassThickness,bezel,refractiveIndex,128);
+  const maxDisplacement=Math.max(...profile.map(value=>Math.abs(value)));
+  const displacementUrl=liquidCreateDisplacementImage(width,height,r,bezel,profile,2);
+  const specularUrl=liquidCreateSpecularImage(width,height,r,bezel,2,Math.PI/3);
+
+  let filter=document.getElementById(id);
+  if(!filter){
+    filter=liquidSvgElement('filter',{id});
+    defs.appendChild(filter);
+  }else filter.replaceChildren();
+  filter.setAttribute('color-interpolation-filters','sRGB');
+  filter.setAttribute('x','-12%');filter.setAttribute('y','-12%');
+  filter.setAttribute('width','124%');filter.setAttribute('height','124%');
+
+  filter.appendChild(liquidSvgElement('feGaussianBlur',{
+    in:'SourceGraphic',stdDeviation:.55,result:'blurred_source'
+  }));
+  liquidAppendImage(filter,displacementUrl,width,height,'displacement_map');
+  filter.appendChild(liquidSvgElement('feDisplacementMap',{
+    in:'blurred_source',in2:'displacement_map',scale:maxDisplacement,
+    xChannelSelector:'R',yChannelSelector:'G',result:'displaced'
+  }));
+  filter.appendChild(liquidSvgElement('feColorMatrix',{
+    in:'displaced',type:'saturate',values:5.5,result:'displaced_saturated'
+  }));
+  liquidAppendImage(filter,specularUrl,width,height,'specular_layer');
+  filter.appendChild(liquidSvgElement('feComposite',{
+    in:'displaced_saturated',in2:'specular_layer',operator:'in',result:'specular_saturated'
+  }));
+  const transfer=liquidSvgElement('feComponentTransfer',{in:'specular_layer',result:'specular_faded'});
+  transfer.appendChild(liquidSvgElement('feFuncA',{type:'linear',slope:.42}));
+  filter.appendChild(transfer);
+  filter.appendChild(liquidSvgElement('feBlend',{
+    in:'specular_saturated',in2:'displaced',mode:'normal',result:'with_saturation'
+  }));
+  filter.appendChild(liquidSvgElement('feBlend',{
+    in:'specular_faded',in2:'with_saturation',mode:'normal'
+  }));
+}
+function initLiquidGlass(){
+  const defs=$('liquidGlassDefs');
+  if(!defs)return;
+  const specs=[
+    {selector:'.stage-left .player',id:'rescene-player-glass',radius:24,bezel:17,thickness:78,index:1.5},
+    {selector:'.stage-right .playlist',id:'rescene-playlist-glass',radius:21,bezel:15,thickness:72,index:1.5},
+    {selector:'#shuffle',id:'rescene-shuffle-glass',radius:16,bezel:11,thickness:38,index:1.5},
+    {selector:'#prev',id:'rescene-prev-glass',radius:16,bezel:11,thickness:38,index:1.5},
+    {selector:'#play',id:'rescene-play-glass',radius:22,bezel:15,thickness:48,index:1.5},
+    {selector:'#next',id:'rescene-next-glass',radius:16,bezel:11,thickness:38,index:1.5},
+    {selector:'#repeat',id:'rescene-repeat-glass',radius:16,bezel:11,thickness:38,index:1.5}
+  ];
+  specs.forEach(spec=>{
+    const element=document.querySelector(spec.selector);
+    if(!element)return;
+    let lastSize='';
+    const apply=()=>{
+      const rect=element.getBoundingClientRect();
+      const width=Math.max(1,Math.round(rect.width));
+      const height=Math.max(1,Math.round(rect.height));
+      if(width<=1||height<=1)return;
+      const key=[width,height,spec.radius,spec.bezel,spec.thickness,spec.index].join(':');
+      if(key===lastSize)return;
+      try{
+        liquidBuildFilter(spec.id,width,height,spec.radius,spec.bezel,spec.thickness,spec.index);
+        lastSize=key;
+        const filterValue='url(#'+spec.id+')';
+        element.style.setProperty('--liquid-glass-filter',filterValue);
+        const supportsSvgBackdrop=window.CSS&&(
+          CSS.supports('backdrop-filter',filterValue)||
+          CSS.supports('-webkit-backdrop-filter',filterValue)
+        );
+        if(supportsSvgBackdrop){
+          element.style.backdropFilter=filterValue;
+          element.style.webkitBackdropFilter=filterValue;
+        }else{
+          element.style.backdropFilter='blur(12px) saturate(1.55)';
+          element.style.webkitBackdropFilter='blur(12px) saturate(1.55)';
+        }
+      }catch(error){
+        console.warn('Liquid Glass filter setup failed for '+spec.id,error);
+        element.style.backdropFilter='blur(12px) saturate(1.45)';
+        element.style.webkitBackdropFilter='blur(12px) saturate(1.45)';
+      }
+    };
+    if('ResizeObserver'in window){
+      const observer=new ResizeObserver(apply);
+      observer.observe(element);
+    }
+    apply();
+  });
+}
+
 document.addEventListener('contextmenu',event=>event.preventDefault());
 const tracks=[
  {n:'Finest Thing',a:'tracks/01.flac'},
@@ -1557,7 +1851,7 @@ function animate(now){
  lyricBox.scrollTop+=scrollDelta*(1-Math.exp(-dt*6.5));
  requestAnimationFrame(animate);
 }
-render();requestAnimationFrame(animate);
+render();initLiquidGlass();requestAnimationFrame(animate);
 </script>
 </body>
 </html>
