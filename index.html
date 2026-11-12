@@ -1186,8 +1186,8 @@ body::before,body::after{content:none!important}
     inset 1px 0 0 rgba(255,255,255,.10),
     inset -1px 0 0 rgba(255,255,255,.08),
     0 14px 34px rgba(0,0,0,.24)!important;
-  -webkit-backdrop-filter:blur(12px) saturate(1.55)!important;
-  backdrop-filter:blur(12px) saturate(1.55)!important;
+  -webkit-backdrop-filter:var(--liquid-glass-filter,blur(12px) saturate(1.55))!important;
+  backdrop-filter:var(--liquid-glass-filter,blur(12px) saturate(1.55))!important;
 }
 .stage-right .playlist{
   border:0!important;
@@ -1217,8 +1217,8 @@ body::before,body::after{content:none!important}
     inset 1px 0 0 rgba(255,255,255,.13),
     inset -1px 0 0 rgba(255,255,255,.09),
     0 5px 14px rgba(0,0,0,.22)!important;
-  -webkit-backdrop-filter:blur(10px) saturate(1.55)!important;
-  backdrop-filter:blur(10px) saturate(1.55)!important;
+  -webkit-backdrop-filter:var(--liquid-glass-filter,blur(10px) saturate(1.55))!important;
+  backdrop-filter:var(--liquid-glass-filter,blur(10px) saturate(1.55))!important;
 }
 .transport button::before,.transport button::after{
   content:none!important;
@@ -1484,18 +1484,13 @@ function initLiquidGlass(){
         liquidBuildFilter(spec.id,width,height,spec.radius,spec.bezel,spec.thickness,spec.index);
         lastSize=key;
         const filterValue='url(#'+spec.id+')';
-        element.style.setProperty('--liquid-glass-filter',filterValue);
         const supportsSvgBackdrop=window.CSS&&(
           CSS.supports('backdrop-filter',filterValue)||
           CSS.supports('-webkit-backdrop-filter',filterValue)
         );
-        if(supportsSvgBackdrop){
-          element.style.backdropFilter=filterValue;
-          element.style.webkitBackdropFilter=filterValue;
-        }else{
-          element.style.backdropFilter='blur(12px) saturate(1.55)';
-          element.style.webkitBackdropFilter='blur(12px) saturate(1.55)';
-        }
+        element.style.setProperty('--liquid-glass-filter',
+          supportsSvgBackdrop?filterValue:'blur(12px) saturate(1.55)'
+        );
       }catch(error){
         console.warn('Liquid Glass filter setup failed for '+spec.id,error);
         element.style.backdropFilter='blur(12px) saturate(1.45)';
