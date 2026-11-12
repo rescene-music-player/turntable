@@ -667,14 +667,200 @@ body{min-height:100svh}
   .transport button#play{width:42px;height:42px}
 }
 
+
+/* Optical Liquid Glass: refracted backdrop, transparent material and real specular edge. */
+.stage-right .playlist{
+  width:270px;
+  max-width:100%;
+  padding:8px 11px;
+  border:0!important;
+  outline:0!important;
+  border-radius:21px;
+  background:rgba(188,211,239,.085);
+  -webkit-backdrop-filter:blur(18px) saturate(1.95) contrast(1.14);
+  backdrop-filter:blur(18px) saturate(1.95) contrast(1.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.48),
+    inset 1px 0 0 rgba(255,255,255,.16),
+    inset -1px 0 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(255,255,255,.18),
+    0 16px 38px rgba(0,0,0,.25),
+    0 2px 18px rgba(195,222,255,.09);
+}
+@supports (backdrop-filter:url(#liquid-refraction)){
+  .stage-right .playlist{
+    -webkit-backdrop-filter:url(#liquid-refraction) blur(13px) saturate(1.95) contrast(1.14);
+    backdrop-filter:url(#liquid-refraction) blur(13px) saturate(1.95) contrast(1.14);
+  }
+}
+.stage-right .playlist::before{
+  content:"";
+  position:absolute;
+  inset:1px;
+  display:block;
+  border-radius:inherit;
+  pointer-events:none;
+  background:none!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.42),
+    inset 1px 0 0 rgba(255,255,255,.12),
+    inset -1px 0 0 rgba(255,255,255,.08);
+}
+.stage-right .playlist::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  display:block;
+  border:0!important;
+  border-radius:inherit;
+  pointer-events:none;
+  box-shadow:
+    inset 0 -1px 0 rgba(255,255,255,.19),
+    inset 0 0 18px rgba(210,231,255,.035);
+}
+
+/* Specular edge reflection, not a radial-gradient button fill. */
+.transport button{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  width:32px;
+  height:32px;
+  border:1px solid rgba(239,247,255,.36);
+  border-radius:50%;
+  background:rgba(216,231,249,.105);
+  color:#f4f7ff;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    inset 1px 0 0 rgba(255,255,255,.15),
+    inset -1px 0 0 rgba(255,255,255,.10),
+    inset 0 -3px 7px rgba(157,190,229,.12),
+    0 5px 15px rgba(0,0,0,.22),
+    0 0 12px rgba(193,220,255,.09);
+  -webkit-backdrop-filter:blur(12px) saturate(1.9) contrast(1.16);
+  backdrop-filter:blur(12px) saturate(1.9) contrast(1.16);
+}
+.transport button::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:2px;
+  left:22%;
+  right:22%;
+  bottom:auto;
+  width:auto;
+  height:1px;
+  border-radius:50%;
+  background:rgba(255,255,255,.82);
+  box-shadow:0 0 5px rgba(255,255,255,.48),0 1px 5px rgba(192,220,255,.35);
+  pointer-events:none;
+}
+@supports (backdrop-filter:url(#liquid-refraction)){
+  .transport button{
+    -webkit-backdrop-filter:url(#liquid-refraction) blur(9px) saturate(1.9) contrast(1.16);
+    backdrop-filter:url(#liquid-refraction) blur(9px) saturate(1.9) contrast(1.16);
+  }
+}
+.transport button svg{position:relative;z-index:1;width:17px;height:17px}
+.transport button#play{
+  width:44px;
+  height:44px;
+  border:1px solid rgba(255,255,255,.55);
+  background:rgba(230,239,252,.17);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255,255,255,.76),
+    inset 1px 0 0 rgba(255,255,255,.20),
+    inset -1px 0 0 rgba(255,255,255,.14),
+    inset 0 -5px 9px rgba(150,188,230,.17),
+    0 8px 21px rgba(0,0,0,.25),
+    0 0 18px rgba(191,220,255,.16);
+}
+.transport button#play::before{
+  left:20%;
+  right:20%;
+  height:1.5px;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 0 8px rgba(255,255,255,.55),0 1px 8px rgba(192,220,255,.38);
+}
+.transport button.mode-toggle.mode-on{
+  background:rgba(145,185,245,.21);
+  border-color:rgba(211,230,255,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 0 15px rgba(97,159,255,.22);
+}
+
+/* Exactly seven lyric rows: 3 previous + active + 3 upcoming. */
+.stage-right .lyrics{
+  width:100%;
+  height:196px!important;
+  min-height:196px!important;
+  max-height:196px!important;
+  flex:0 0 196px!important;
+  padding:0 12px!important;
+  border:0!important;
+  overflow-x:hidden!important;
+  overflow-y:hidden!important;
+  scroll-behavior:auto!important;
+}
+.stage-right .lyrics::before,
+.stage-right .lyrics::after{
+  content:"";
+  display:block!important;
+  position:relative!important;
+  inset:auto!important;
+  width:100%;
+  height:84px!important;
+  min-height:84px!important;
+  max-height:84px!important;
+  flex:0 0 84px!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  pointer-events:none;
+}
+.stage-right .lyrics p,
+.stage-right .lyrics p.on{
+  display:block;
+  width:100%;
+  height:28px!important;
+  min-height:28px!important;
+  max-height:28px!important;
+  margin:0!important;
+  padding:4px 2px!important;
+  box-sizing:border-box;
+  line-height:20px!important;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:clip;
+  transform:none;
+}
+@media(max-width:720px){
+  .stage-right .lyrics{
+    height:196px!important;
+    min-height:196px!important;
+    max-height:196px!important;
+    flex-basis:196px!important;
+  }
+  .stage-right .lyrics::before,.stage-right .lyrics::after{
+    height:84px!important;min-height:84px!important;max-height:84px!important;flex-basis:84px!important;
+  }
+  .stage-right .lyrics p,.stage-right .lyrics p.on{
+    height:28px!important;min-height:28px!important;max-height:28px!important;line-height:20px!important;
+  }
+}
+
 </style>
 </head>
 <body>
 <svg class="glass-filters" aria-hidden="true" width="0" height="0" style="position:absolute;overflow:hidden">
-  <filter id="liquid-refraction" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
-    <feTurbulence type="fractalNoise" baseFrequency=".012 .018" numOctaves="2" seed="7" result="glass-noise"/>
-    <feGaussianBlur in="glass-noise" stdDeviation="1.8" result="soft-noise"/>
-    <feDisplacementMap in="SourceGraphic" in2="soft-noise" scale="34" xChannelSelector="R" yChannelSelector="G"/>
+  <filter id="liquid-refraction" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency=".009 .014" numOctaves="2" seed="17" result="glass-noise"/>
+    <feGaussianBlur in="glass-noise" stdDeviation="1.2" result="soft-noise"/>
+    <feDisplacementMap in="SourceGraphic" in2="soft-noise" scale="48" xChannelSelector="R" yChannelSelector="G" result="refracted"/>
+    <feGaussianBlur in="refracted" stdDeviation=".35"/>
   </filter>
 </svg>
 <div class="wrap">
